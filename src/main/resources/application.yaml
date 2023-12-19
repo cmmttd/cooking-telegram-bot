@@ -12,8 +12,8 @@ logging:
     com.belogrudovw.cookingbot: debug
 telegram:
   bot:
-    token: 6959384612:AAFc2hzVGk790oWY-6k0BVr9D6sfOjKXe-4
-    name: below_par_bot
+    token: ${COOKING_BOT_TOKEN}
+    name: ${COOKING_BOT_NAME}
     path: /webhook/
-  webhook-url: https://loosely-accurate-rabbit.ngrok-free.app
+  webhook-url: ${WEBHOOK_URL}
   telegram-api-url: https://api.telegram.org/bot
