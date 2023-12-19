@@ -1,0 +1,22 @@
+{
+  "property": {
+    "language": "Language of th recipe from the recipe's request",
+    "lightness": "Lightness of desired dish from the recipe's request",
+    "units": "Measurement units from the recipe's request",
+    "difficulty": "Difficulty of cooking process from the recipe's request"
+  },
+  "title": "Few words title",
+  "short_description": "Short description by 200-300 symbols length. With list of ingredients, each other from new line with sign •",
+  "steps": [
+    {
+      "delay": "int value in minutes related to first step from 0 to max difficult time",
+      "title": "int number of the step and name of the step",
+      "description": "What should be done"
+    },
+    {
+      "delay": "int value in minutes related to first step from 0 to max difficult time",
+      "title": "int number of the step and name of the step",
+      "description": "What should be done"
+    }
+  ]
+}

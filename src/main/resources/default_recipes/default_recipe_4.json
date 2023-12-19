@@ -1,0 +1,27 @@
+{
+  "property": {
+    "language": "English",
+    "lightness": "Light",
+    "units": "METRIC",
+    "difficulty": "15 minutes"
+  },
+  "title": "Avocado and Chickpea Salad",
+  "short_description": "This Avocado and Chickpea Salad is a refreshing and nutritious choice, perfect for a light meal. It combines creamy avocado, protein-rich chickpeas, and a zesty lemon dressing. \n• 1 ripe avocado \n• 400g canned chickpeas, drained and rinsed \n• 1 small red onion, finely chopped \n• A handful of cherry tomatoes, halved \n• Juice of 1 lemon \n• 2 tablespoons olive oil \n• Salt and pepper to taste \n• Fresh parsley, chopped",
+  "steps": [
+    {
+      "delay": 0,
+      "title": "1. Prepare Ingredients",
+      "description": "Dice 1 ripe avocado and place in a large bowl. Add 400g drained and rinsed chickpeas, 1 finely chopped small red onion, and a handful of halved cherry tomatoes."
+    },
+    {
+      "delay": 5,
+      "title": "2. Make Dressing",
+      "description": "In a small bowl, whisk together the juice of 1 lemon, 2 tablespoons of olive oil, and salt and pepper to taste."
+    },
+    {
+      "delay": 10,
+      "title": "3. Combine and Serve",
+      "description": "Pour the dressing over the salad and toss gently to combine. Garnish with chopped fresh parsley before serving."
+    }
+  ]
+}
