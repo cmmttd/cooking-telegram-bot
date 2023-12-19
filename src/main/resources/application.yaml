@@ -1,15 +1,13 @@
 server:
   port: 8083
 spring:
-  profiles:
-    active: test
   jackson:
     default-property-inclusion: non_null
     property-naming-strategy: com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy
 logging:
   level:
     root: ERROR
-    com.belogrudovw.cookingbot: debug
+    com.belogrudovw.cookingbot: info
 telegram:
   bot:
     token: ${COOKING_BOT_TOKEN}
@@ -17,3 +15,12 @@ telegram:
     path: /webhook/
   webhook-url: ${WEBHOOK_URL}
   telegram-api-url: https://api.telegram.org/bot
+---
+spring:
+  config:
+    activate:
+      on-profile: test
+logging:
+  level:
+    root: ERROR
+    com.belogrudovw.cookingbot: debug
