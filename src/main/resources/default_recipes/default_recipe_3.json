@@ -1,0 +1,28 @@
+{
+  "property": {
+    "language": "English",
+    "cuisine": "Italian",
+    "lightness": "Light",
+    "units": "METRIC",
+    "difficulty": "15 minutes"
+  },
+  "title": "Lemon Ricotta Pasta",
+  "short_description": "Lemon Ricotta Pasta is a light and creamy Italian dish, blending the zestiness of lemon with smooth ricotta, paired with pasta. \n• 350g pasta (fusilli or spaghetti) \n• 250g ricotta cheese \n• 1 lemon (zest and juice) \n• 50g grated Parmesan cheese \n• Salt and pepper to taste \n• Fresh basil or parsley for garnish",
+  "steps": [
+    {
+      "delay": 0,
+      "title": "Cook Pasta",
+      "description": "Bring a pot of salted water to a boil. Cook 350g of your choice of pasta (like fusilli or spaghetti) until al dente, about 8-10 minutes. Reserve some pasta water before draining."
+    },
+    {
+      "delay": 10,
+      "title": "Make Lemon Ricotta Sauce",
+      "description": "In a bowl, mix 250g of ricotta cheese with the zest and juice of 1 lemon, 50g of grated Parmesan cheese, and salt and pepper to taste. Thin the sauce with a bit of the reserved pasta water to get a creamy consistency."
+    },
+    {
+      "delay": 15,
+      "title": "Combine and Serve",
+      "description": "Toss the cooked pasta with the lemon ricotta sauce. Adjust the seasoning as needed, and add more pasta water if necessary. Serve garnished with extra Parmesan and fresh basil or parsley."
+    }
+  ]
+}

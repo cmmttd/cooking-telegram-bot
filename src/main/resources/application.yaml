@@ -1,0 +1,19 @@
+server:
+  port: 8083
+spring:
+  profiles:
+    active: test
+  jackson:
+    default-property-inclusion: non_null
+    property-naming-strategy: com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy
+logging:
+  level:
+    root: ERROR
+    com.belogrudovw.cookingbot: debug
+telegram:
+  bot:
+    token: 6959384612:AAFc2hzVGk790oWY-6k0BVr9D6sfOjKXe-4
+    name: below_par_bot
+    path: /webhook/
+  webhook-url: https://loosely-accurate-rabbit.ngrok-free.app
+  telegram-api-url: https://api.telegram.org/bot
