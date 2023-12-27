@@ -1,36 +1,40 @@
-package com.belogrudovw.cookingbot.service;
+package com.belogrudovw.cookingbot.service.impl;
 
-import com.belogrudovw.cookingbot.domain.Chat;
 import com.belogrudovw.cookingbot.handler.Handler;
 import com.belogrudovw.cookingbot.handler.callback.CallbackHandler;
 import com.belogrudovw.cookingbot.handler.callback.DynamicCallbackHandler;
 import com.belogrudovw.cookingbot.handler.message.MessageHandler;
-import com.belogrudovw.cookingbot.storage.Storage;
+import com.belogrudovw.cookingbot.service.ChatService;
+import com.belogrudovw.cookingbot.service.TelegramHandlerDispatcher;
 import com.belogrudovw.cookingbot.telegram.domain.UserAction;
 
 import java.util.Map;
 import java.util.Optional;
-
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
+
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class TelegramHandlerDispatcherCommon implements TelegramHandlerDispatcher {
 
+    ChatService chatService;
+    Handler defaultHandler;
     @Resource
-    private final Map<String, CallbackHandler> callbackHandlersMap;
+    Map<String, CallbackHandler> callbackHandlersMap;
     @Resource
-    private final Map<String, DynamicCallbackHandler> dynamicCallbackHandlerMap;
+    Map<String, DynamicCallbackHandler> dynamicCallbackHandlerMap;
     @Resource
-    private final Map<String, MessageHandler> messageHandlersMap;
-    private final Handler defaultHandler;
-    private final Storage<Long, Chat> chatStorage;
+    Map<String, MessageHandler> messageHandlersMap;
 
+    // TODO: 28/12/2023 Remove init section
     @PostConstruct
     void init() {
         log.debug("Callbacks handlers: {}", callbackHandlersMap.keySet());
@@ -41,17 +45,12 @@ public class TelegramHandlerDispatcherCommon implements TelegramHandlerDispatche
 
     @Override
     public void dispatch(UserAction action) {
-        findMessageHandler(action)
+        Optional.<Handler>empty()
+                .or(() -> findMessageHandler(action))
                 .or(() -> findCallbackQueryHandler(action))
-                .filter(handler -> validate(chatStorage.get(action.getChatId())))
+                .filter(handler -> chatService.isExists(action.getChatId()))
                 .ifPresentOrElse(handler -> handler.handle(action),
                         () -> defaultHandler.handle(action));
-    }
-
-    private boolean validate(Optional<Chat> chat) {
-        return chat
-                .filter(ch -> ch.getPivotScreen() != null)
-                .isPresent();
     }
 
     private Optional<Handler> findMessageHandler(UserAction action) {
@@ -66,8 +65,8 @@ public class TelegramHandlerDispatcherCommon implements TelegramHandlerDispatche
         Optional<Handler> callbackHandler = callbackData
                 .map(callbackHandlersMap::get);
         Optional<Handler> dynamicCallbackHandler = callbackData
-                .flatMap(data -> dynamicCallbackHandlerMap.entrySet().stream()
-                        .filter(pattern -> data.matches(pattern.getKey()))
+                .flatMap(inputCallbackData -> dynamicCallbackHandlerMap.entrySet().stream()
+                        .filter(patternHandler -> inputCallbackData.matches(patternHandler.getKey()))
                         .map(Map.Entry::getValue)
                         .findFirst());
         return callbackHandler

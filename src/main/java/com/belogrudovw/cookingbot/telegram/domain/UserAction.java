@@ -1,8 +1,9 @@
 package com.belogrudovw.cookingbot.telegram.domain;
 
 import java.util.Optional;
+import jakarta.validation.constraints.NotNull;
 
-public record UserAction(int updateId, Optional<Message> message, Optional<CallbackQuery> callbackQuery) {
+public record UserAction(@NotNull Integer updateId, Optional<Message> message, Optional<CallbackQuery> callbackQuery) {
 
     public long getChatId() {
         return message()
@@ -13,7 +14,7 @@ public record UserAction(int updateId, Optional<Message> message, Optional<Callb
                 .orElseThrow();
     }
 
-    public record CallbackQuery(long id, From from, Message message, String data) {
+    public record CallbackQuery(long id, From from, @NotNull Message message, String data) {
     }
 
     public record TelegramChat(long id, Optional<String> firstName, Optional<String> lastName, Optional<String> username) {
@@ -22,6 +23,6 @@ public record UserAction(int updateId, Optional<Message> message, Optional<Callb
     public record From(long id, Optional<String> firstName, Optional<String> lastName, Optional<String> username, String languageCode) {
     }
 
-    public record Message(int messageId, From from, TelegramChat chat, String text, Optional<Keyboard> replyMarkup) {
+    public record Message(@NotNull Integer messageId, From from, TelegramChat chat, String text, Optional<Keyboard> replyMarkup) {
     }
 }

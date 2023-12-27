@@ -1,13 +1,20 @@
-package com.belogrudovw.cookingbot.service;
+package com.belogrudovw.cookingbot.service.impl;
 
 import com.belogrudovw.cookingbot.domain.screen.Screen;
+import com.belogrudovw.cookingbot.service.OrderService;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
-import static com.belogrudovw.cookingbot.domain.screen.DefaultScreen.*;
+import static com.belogrudovw.cookingbot.domain.screen.DefaultScreens.COOKING;
+import static com.belogrudovw.cookingbot.domain.screen.DefaultScreens.HOME;
+import static com.belogrudovw.cookingbot.domain.screen.DefaultScreens.SETUP_DIFFICULTIES;
+import static com.belogrudovw.cookingbot.domain.screen.DefaultScreens.SETUP_LANG;
+import static com.belogrudovw.cookingbot.domain.screen.DefaultScreens.SETUP_LIGHTNESS;
+import static com.belogrudovw.cookingbot.domain.screen.DefaultScreens.SETUP_UNITS;
+import static com.belogrudovw.cookingbot.domain.screen.DefaultScreens.SPIN_PICK_RECIPE;
 
 @Service
 public class OrderServiceEnumBased implements OrderService {
@@ -35,7 +42,7 @@ public class OrderServiceEnumBased implements OrderService {
     }
 
     @Override
-    public Screen getFirst() {
+    public Screen getDefault() {
         return SETUP_LANG;
     }
 

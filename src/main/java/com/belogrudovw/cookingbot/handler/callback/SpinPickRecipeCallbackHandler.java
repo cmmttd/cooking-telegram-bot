@@ -1,100 +1,79 @@
 package com.belogrudovw.cookingbot.handler.callback;
 
 import com.belogrudovw.cookingbot.domain.Chat;
+import com.belogrudovw.cookingbot.domain.GenerationMode;
 import com.belogrudovw.cookingbot.domain.Recipe;
-import com.belogrudovw.cookingbot.domain.buttons.CallbackButton;
 import com.belogrudovw.cookingbot.domain.buttons.SpinPickRecipeButtons;
-import com.belogrudovw.cookingbot.domain.enums.GenerationMode;
 import com.belogrudovw.cookingbot.domain.screen.CustomScreen;
-import com.belogrudovw.cookingbot.domain.screen.DefaultScreen;
+import com.belogrudovw.cookingbot.domain.screen.DefaultScreens;
 import com.belogrudovw.cookingbot.domain.screen.Screen;
+import com.belogrudovw.cookingbot.error.IllegalChatStateException;
+import com.belogrudovw.cookingbot.service.ChatService;
+import com.belogrudovw.cookingbot.service.CookingScheduleService;
 import com.belogrudovw.cookingbot.service.OrderService;
 import com.belogrudovw.cookingbot.service.RecipeService;
 import com.belogrudovw.cookingbot.service.ResponseService;
-import com.belogrudovw.cookingbot.storage.Storage;
-import com.belogrudovw.cookingbot.telegram.domain.Keyboard;
 import com.belogrudovw.cookingbot.telegram.domain.UserAction;
 
-import java.util.Arrays;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import lombok.RequiredArgsConstructor;
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import static com.belogrudovw.cookingbot.util.KeyboardUtil.buildDefaultKeyboard;
-import static com.belogrudovw.cookingbot.util.StringUtil.escapeCharacters;
-
 @Slf4j
 @Component
-@RequiredArgsConstructor
-public class SpinPickRecipeCallbackHandler implements CallbackHandler {
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+public class SpinPickRecipeCallbackHandler extends AbstractCallbackHandler {
 
-    private static final Screen SCREEN = DefaultScreen.SPIN_PICK_RECIPE;
+    static final Screen CURRENT_SCREEN = DefaultScreens.SPIN_PICK_RECIPE;
 
-    private final Storage<Long, Chat> chatStorage;
-    private final OrderService orderService;
-    private final ResponseService responseService;
-    private final RecipeService recipeService;
+    ChatService chatService;
+    OrderService orderService;
+    RecipeService recipeService;
+    CookingScheduleService cookingScheduleService;
+
+    public SpinPickRecipeCallbackHandler(ResponseService responseService, ChatService chatService, OrderService orderService,
+                                         RecipeService recipeService, CookingScheduleService cookingScheduleService) {
+        super(responseService, chatService);
+        this.chatService = chatService;
+        this.orderService = orderService;
+        this.recipeService = recipeService;
+        this.cookingScheduleService = cookingScheduleService;
+    }
 
     @Override
     public Set<String> getSupported() {
-        return Arrays.stream(SCREEN.getButtons())
-                .map(CallbackButton::getCallbackData)
-                .collect(Collectors.toSet());
+        return setOfCallbackDataFrom(CURRENT_SCREEN);
     }
 
     @Override
-    public void handle(UserAction action) {
-        log.debug("Pick recipe handler called for: {}", action);
-        long chatId = action.getChatId();
-        UserAction.CallbackQuery callbackQuery = action.callbackQuery().orElseThrow();
-        chatStorage.get(chatId)
-                .filter(chat -> chat.getCurrentRecipe() != null)
-                .map(chat -> mapToScreen(chat, callbackQuery))
-                .ifPresentOrElse(nextScreen -> respond(nextScreen, chatId, callbackQuery),
-                        () -> respond(orderService.getFirst(), chatId, callbackQuery));
-    }
-
-    private Screen mapToScreen(Chat chat, UserAction.CallbackQuery callbackQuery) {
+    public void handleCallback(Chat chat, UserAction.CallbackQuery callbackQuery) {
+        long chatId = chat.getId();
+        if (chat.getCurrentRecipe() == null) {
+            throw new IllegalChatStateException(chatId, "Recipe must be not null on the step: " + CURRENT_SCREEN);
+        }
         var button = SpinPickRecipeButtons.valueOf(callbackQuery.data());
-        return switch (button) {
-            case SPIN_PICK_RECIPE_SPIN -> {
-                chat.addLastRecipeToHistory();
-                Recipe recipe = chat.getMode() == GenerationMode.NEW
-                        ? recipeService.requestNew(chat.getProperty())
-                        : recipeService.getRandom(chat);
-                chat.setCurrentRecipe(recipe);
-                chat.setCookingProgress(0);
-                chat.addLastRecipeToHistory();
-                chatStorage.save(chat);
-                yield CustomScreen.builder()
-                        .buttons(SCREEN.getButtons())
-                        .text(escapeCharacters("*" + recipe.getTitle() + "*" + "\n" + recipe.getShortDescription()))
-                        .build();
+        switch (button) {
+            case SPIN_PICK_RECIPE_START -> cookingScheduleService.scheduleNexStep(chat);
+            case SPIN_PICK_RECIPE_SPIN -> respondNewRecipe(chat, callbackQuery);
+            case SPIN_PICK_RECIPE_BACK -> {
+                Screen nextScreen = orderService.prevScreen(CURRENT_SCREEN);
+                respond(chatId, callbackQuery.message().messageId(), nextScreen);
             }
-            case SPIN_PICK_RECIPE_START -> {
-                chat.addLastRecipeToHistory();
-                Recipe recipe = chat.getCurrentRecipe();
-                Screen nextScreenTemplate = orderService.nextScreen(SCREEN);
-                int cookingProgress = chat.getCookingProgress();
-                Recipe.CookingStep step = recipe.getSteps().get(cookingProgress);
-                chat.setCurrentRecipe(recipe);
-                chat.setCookingProgress(cookingProgress + 1);
-                chatStorage.save(chat);
-                // TODO: 19/12/2023 Issue#5 - Add something like delayedTaskService.createPostponedTask(chat.getId())
-                yield CustomScreen.builder()
-                        .buttons(nextScreenTemplate.getButtons())
-                        .text(escapeCharacters("*" + step.title() + "*" + "\n" + step.description()))
-                        .build();
-            }
-            case SPIN_PICK_RECIPE_BACK -> orderService.prevScreen(SCREEN);
-        };
+        }
     }
 
-    private void respond(Screen nextScreen, long chatId, UserAction.CallbackQuery callbackQuery) {
-        Keyboard keyboard = buildDefaultKeyboard(nextScreen.getButtons());
-        responseService.editMessage(chatId, callbackQuery.message().messageId(), nextScreen.getText(), keyboard);
+    private void respondNewRecipe(Chat chat, UserAction.CallbackQuery callbackQuery) {
+        Recipe recipe = chat.getMode() == GenerationMode.NEW
+                ? recipeService.requestNew(chat)
+                : recipeService.getRandom(chat);
+        chatService.setNewRecipe(chat, recipe);
+        CustomScreen screen = CustomScreen.builder()
+                .buttons(CURRENT_SCREEN.getButtons())
+                .text(recipe.toString())
+                .build();
+        respond(chat.getId(), callbackQuery.message().messageId(), screen);
     }
 }

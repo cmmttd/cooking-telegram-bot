@@ -1,11 +1,13 @@
 package com.belogrudovw.cookingbot.domain;
 
-import com.belogrudovw.cookingbot.domain.properties.Property;
-
 import java.util.List;
 import java.util.UUID;
 
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 @Data
@@ -18,8 +20,18 @@ public final class Recipe {
     Property property;
     String title;
     String shortDescription;
+    int cookingTime;
     List<CookingStep> steps;
 
-    public record CookingStep(int delay, String title, String description) {
+    @Override
+    public String toString() {
+        return "*%s - %d min*%n%s".formatted(title, cookingTime, shortDescription);
+    }
+
+    public record CookingStep(int offset, String title, String description) {
+        @Override
+        public String toString() {
+            return "*%s*%n%s".formatted(title, description);
+        }
     }
 }

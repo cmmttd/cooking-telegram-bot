@@ -8,5 +8,5 @@ public interface OrderService {
 
     Screen nextScreen(Screen currentScreen);
 
-    Screen getFirst();
+    Screen getDefault();
 }

@@ -1,7 +1,5 @@
 package com.belogrudovw.cookingbot.domain;
 
-import com.belogrudovw.cookingbot.domain.enums.GenerationMode;
-import com.belogrudovw.cookingbot.domain.properties.Property;
 import com.belogrudovw.cookingbot.domain.screen.Screen;
 
 import java.util.ArrayList;
@@ -14,6 +12,7 @@ import lombok.experimental.FieldDefaults;
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Chat {
+
     long id;
     int requestLimitCount;
     GenerationMode mode;

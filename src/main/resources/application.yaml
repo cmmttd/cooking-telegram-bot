@@ -22,5 +22,19 @@ spring:
       on-profile: test
 logging:
   level:
-    root: ERROR
-    com.belogrudovw.cookingbot: debug
+    com:
+      belogrudovw:
+        cookingbot: debug
+---
+spring:
+  config:
+    activate:
+      on-profile: debug
+logging:
+  level:
+    com:
+      belogrudovw:
+        cookingbot: debug
+    org:
+      springframework:
+        web: trace

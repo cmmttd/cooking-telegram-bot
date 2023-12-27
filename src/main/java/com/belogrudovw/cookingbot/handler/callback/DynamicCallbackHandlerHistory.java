@@ -3,37 +3,41 @@ package com.belogrudovw.cookingbot.handler.callback;
 import com.belogrudovw.cookingbot.domain.Chat;
 import com.belogrudovw.cookingbot.domain.Recipe;
 import com.belogrudovw.cookingbot.domain.screen.CustomScreen;
-import com.belogrudovw.cookingbot.domain.screen.DefaultScreen;
+import com.belogrudovw.cookingbot.domain.screen.DefaultScreens;
 import com.belogrudovw.cookingbot.domain.screen.Screen;
+import com.belogrudovw.cookingbot.service.ChatService;
 import com.belogrudovw.cookingbot.service.OrderService;
 import com.belogrudovw.cookingbot.service.RecipeService;
 import com.belogrudovw.cookingbot.service.ResponseService;
-import com.belogrudovw.cookingbot.storage.Storage;
-import com.belogrudovw.cookingbot.telegram.domain.Keyboard;
 import com.belogrudovw.cookingbot.telegram.domain.UserAction;
 
 import java.util.UUID;
 
-import lombok.RequiredArgsConstructor;
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import static com.belogrudovw.cookingbot.util.KeyboardUtil.buildDefaultKeyboard;
-import static com.belogrudovw.cookingbot.util.StringUtil.escapeCharacters;
-
 @Slf4j
 @Component
-@RequiredArgsConstructor
-public class DynamicCallbackHandlerHistory implements DynamicCallbackHandler {
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+public class DynamicCallbackHandlerHistory extends AbstractDynamicCallbackHandler {
 
-    private static final DefaultScreen SCREEN = DefaultScreen.HOME;
-    private static final String HOME_HISTORY_CALLBACK_BASE = SCREEN.name() + "_";
-    private static final String CALLBACK_PATTERN = HOME_HISTORY_CALLBACK_BASE + "\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}";
+    static final DefaultScreens CURRENT_SCREEN = DefaultScreens.HOME;
+    static final String HOME_HISTORY_CALLBACK_BASE = CURRENT_SCREEN.name() + "_";
+    static final String CALLBACK_PATTERN = HOME_HISTORY_CALLBACK_BASE + "\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}";
 
-    private final Storage<Long, Chat> chatStorage;
-    private final RecipeService recipeService;
-    private final OrderService orderService;
-    private final ResponseService responseService;
+    ChatService chatService;
+    RecipeService recipeService;
+    OrderService orderService;
+
+    public DynamicCallbackHandlerHistory(ResponseService responseService, ChatService chatService, RecipeService recipeService,
+                                         OrderService orderService) {
+        super(responseService, chatService);
+        this.chatService = chatService;
+        this.recipeService = recipeService;
+        this.orderService = orderService;
+    }
 
     @Override
     public String getPattern() {
@@ -41,32 +45,16 @@ public class DynamicCallbackHandlerHistory implements DynamicCallbackHandler {
     }
 
     @Override
-    public void handle(UserAction action) {
-        log.debug("History dynamic callback");
-        long chatId = action.getChatId();
-        UserAction.CallbackQuery callbackQuery = action.callbackQuery().orElseThrow();
-        chatStorage.get(chatId)
-                .map(chat -> mapToScreen(chat, callbackQuery))
-                .ifPresent(nextScreen -> respond(nextScreen, chatId, callbackQuery));
-    }
-
-    private Screen mapToScreen(Chat chat, UserAction.CallbackQuery callbackQuery) {
+    public void handleCallback(Chat chat, UserAction.CallbackQuery callbackQuery) {
         // TODO: 20/12/2023 Wrap with try-catch
         String[] recipeIdString = callbackQuery.data().split(HOME_HISTORY_CALLBACK_BASE);
         UUID recipeId = UUID.fromString(recipeIdString[1]);
-        Recipe recipe = recipeService.getById(recipeId);
-        chat.setCurrentRecipe(recipe);
-        chat.setCookingProgress(0);
-        chatStorage.save(chat);
-        Screen nextScreen = orderService.nextScreen(SCREEN);
-        return CustomScreen.builder()
-                .buttons(nextScreen.getButtons())
-                .text(escapeCharacters("*" + recipe.getTitle() + "*" + "\n" + recipe.getShortDescription()))
+        Recipe recipe = recipeService.findById(recipeId);
+        chatService.setNewRecipe(chat, recipe);
+        Screen screen = CustomScreen.builder()
+                .buttons(orderService.nextScreen(CURRENT_SCREEN).getButtons())
+                .text(recipe.toString())
                 .build();
-    }
-
-    private void respond(Screen nextScreen, long chatId, UserAction.CallbackQuery callbackQuery) {
-        Keyboard keyboard = buildDefaultKeyboard(nextScreen.getButtons());
-        responseService.editMessage(chatId, callbackQuery.message().messageId(), nextScreen.getText(), keyboard);
+        respond(chat.getId(), callbackQuery.message().messageId(), screen);
     }
 }

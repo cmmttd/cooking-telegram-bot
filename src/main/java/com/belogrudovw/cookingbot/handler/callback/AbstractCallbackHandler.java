@@ -1,0 +1,42 @@
+package com.belogrudovw.cookingbot.handler.callback;
+
+import com.belogrudovw.cookingbot.domain.Chat;
+import com.belogrudovw.cookingbot.domain.screen.Screen;
+import com.belogrudovw.cookingbot.service.ChatService;
+import com.belogrudovw.cookingbot.service.ResponseService;
+import com.belogrudovw.cookingbot.telegram.domain.Keyboard;
+import com.belogrudovw.cookingbot.telegram.domain.UserAction;
+
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
+
+import static com.belogrudovw.cookingbot.util.KeyboardBuilder.buildDefaultKeyboard;
+
+@Slf4j
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+public abstract class AbstractCallbackHandler implements CallbackHandler {
+
+    ResponseService responseService;
+    ChatService chatService;
+
+    @Override
+    public void handle(UserAction action) {
+        log.info("{} called for action: {}", this.getClass().getSimpleName(), action);
+        Chat chat = chatService.findById(action.getChatId());
+        UserAction.CallbackQuery callbackQuery = action.callbackQuery().orElseThrow();
+        handleCallback(chat, callbackQuery);
+    }
+
+    public void respond(long chatId, long messageId, Screen nextScreen) {
+        Keyboard keyboard = buildDefaultKeyboard(nextScreen.getButtons());
+        responseService.editMessage(chatId, messageId, nextScreen.getText(), keyboard);
+    }
+
+    public void respond(long chatId, Screen nextScreen) {
+        Keyboard keyboard = buildDefaultKeyboard(nextScreen.getButtons());
+        responseService.sendMessage(chatId, nextScreen.getText(), keyboard);
+    }
+}

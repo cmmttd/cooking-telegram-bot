@@ -1,8 +1,9 @@
-package com.belogrudovw.cookingbot.service;
+package com.belogrudovw.cookingbot.service.impl;
 
 import com.belogrudovw.cookingbot.domain.Chat;
+import com.belogrudovw.cookingbot.domain.Property;
 import com.belogrudovw.cookingbot.domain.Recipe;
-import com.belogrudovw.cookingbot.domain.properties.Property;
+import com.belogrudovw.cookingbot.service.RecipeService;
 import com.belogrudovw.cookingbot.storage.Storage;
 
 import java.io.IOException;
@@ -10,22 +11,34 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Iterator;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
+import jakarta.annotation.PostConstruct;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import jakarta.annotation.PostConstruct;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RecipeServiceOpenAiGpt implements RecipeService {
 
-    private final Storage<UUID, Recipe> recipeStorage;
+    static final Recipe STUB_RECIPE = Recipe.builder()
+            .id(UUID.randomUUID())
+            .title("Stub recipe")
+            .shortDescription("Something goes wrong. Please notify my author - @belogrudovw")
+            .property(Property.builder().build())
+            .steps(List.of(new Recipe.CookingStep(0, "Please contact support:", "@belogrudovw")))
+            .build();
+
+    Storage<UUID, Recipe> recipeStorage;
 
     // TODO: 15/12/2023 Remove init
     @PostConstruct
@@ -54,19 +67,25 @@ public class RecipeServiceOpenAiGpt implements RecipeService {
                 .filter(recipe -> !chat.getHistory().contains(recipe))
                 .filter(recipe -> recipe.getProperty().matchesTo(chat.getProperty()))
                 .findFirst()
-                .orElseGet(() -> requestNew(chat.getProperty()));
+                .orElseGet(() -> requestNew(chat));
     }
 
     @Override
-    public Recipe getById(UUID id) {
+    public Recipe findById(UUID id) {
         return recipeStorage.get(id)
-                .orElse(getStubRecipe());
+                // TODO: 29/12/2023 Throw RecipeNotFoundException instead
+                .orElseGet(this::getStubRecipe);
     }
 
     @Override
-    public Recipe requestNew(Property property) {
+    public Recipe requestNew(Chat chat) {
         // TODO: 18/12/2023 Call gpt instead
         log.debug("Have to call gpt");
+        // TODO: 29/12/2023 Remove stub once the api has been implemented
         return getStubRecipe();
+    }
+
+    private Recipe getStubRecipe() {
+        return STUB_RECIPE;
     }
 }

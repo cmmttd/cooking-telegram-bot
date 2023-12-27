@@ -7,19 +7,20 @@
   },
   "title": "Cucumber and Dill Salad",
   "short_description": "Cucumber and Dill Salad is a crisp, hydrating, and fresh side dish, perfect for a light meal. It's simple to make and full of flavor. \n• 2 large cucumbers \n• 3 tablespoons fresh dill, chopped \n• 2 tablespoons white wine vinegar \n• 1 tablespoon olive oil \n• 1 teaspoon sugar \n• Salt and pepper to taste",
+  "cooking_time": 10,
   "steps": [
     {
-      "delay": 0,
+      "offset": 0,
       "title": "1. Slice Cucumbers",
       "description": "Thinly slice the cucumbers and place them in a large bowl."
     },
     {
-      "delay": 5,
+      "offset": 5,
       "title": "2. Mix Dressing",
       "description": "In a small bowl, combine white wine vinegar, olive oil, sugar, salt, and pepper. Stir well to create the dressing."
     },
     {
-      "delay": 10,
+      "offset": 10,
       "title": "3. Combine and Chill",
       "description": "Pour the dressing over the cucumbers and toss to coat. Add the chopped dill and mix again. Refrigerate for a few minutes before serving."
     }

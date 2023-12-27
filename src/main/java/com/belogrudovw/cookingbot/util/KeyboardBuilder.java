@@ -9,12 +9,13 @@ import java.util.List;
 
 import lombok.experimental.UtilityClass;
 
-// TODO: 15/12/2023 Move this class
+import static com.belogrudovw.cookingbot.util.StringUtil.escapeCharacters;
+
 @UtilityClass
-public final class KeyboardUtil {
+public final class KeyboardBuilder {
     public static final int ROW_LENGTH_LIMIT = 15;
 
-    public static Keyboard buildDefaultKeyboard(CallbackButton[] values) {
+    public static Keyboard buildDefaultKeyboard(List<CallbackButton> values) {
         List<List<Button>> keyboard = new ArrayList<>();
         List<Button> row = new ArrayList<>();
         int lineLen = 0;
@@ -26,7 +27,7 @@ public final class KeyboardUtil {
                 lineLen = 0;
             }
             lineLen += buttonLen;
-            row.add(new Button(button.getText(), button.getCallbackData()));
+            row.add(new Button(escapeCharacters(button.getText()), button.getCallbackData()));
         }
         keyboard.add(row);
         return Keyboard.builder()

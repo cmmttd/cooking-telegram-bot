@@ -7,19 +7,20 @@
   },
   "title": "Greek Yogurt Parfait",
   "short_description": "A Greek Yogurt Parfait is a delightful blend of creamy yogurt, fresh fruits, and crunchy granola, perfect for a healthy and quick snack or breakfast. \n• 200g Greek yogurt \n• 1 tablespoon honey \n• 50g granola \n• 100g mixed berries (like strawberries, blueberries) \n• A sprinkle of cinnamon (optional)",
+  "cooking_time": 10,
   "steps": [
     {
-      "delay": 0,
+      "offset": 0,
       "title": "1. Layer Yogurt and Honey",
       "description": "Spoon half of the Greek yogurt into a glass or bowl. Drizzle with half of the honey."
     },
     {
-      "delay": 5,
+      "offset": 5,
       "title": "2. Add Fruits and Granola",
       "description": "Layer half of the mixed berries and half of the granola over the yogurt."
     },
     {
-      "delay": 10,
+      "offset": 10,
       "title": "3. Repeat Layers and Serve",
       "description": "Repeat the layers with the remaining yogurt, honey, berries, and granola. Sprinkle with cinnamon if desired and serve immediately."
     }

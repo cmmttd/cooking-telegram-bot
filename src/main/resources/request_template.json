@@ -7,14 +7,15 @@
   },
   "title": "Few words title",
   "short_description": "Short description by 200-300 symbols length. With list of ingredients, each other from new line with sign •",
+  "cooking_time": "int value in minutes of general actual cooking time for the recipe",
   "steps": [
     {
-      "delay": "int value in minutes related to first step from 0 to max difficult time",
+      "offset": "int value in minutes related to first step (from 0 to end cooking time)",
       "title": "int number of the step and name of the step",
       "description": "What should be done"
     },
     {
-      "delay": "int value in minutes related to first step from 0 to max difficult time",
+      "offset": "int value in minutes related to first step (from 0 to end cooking time)",
       "title": "int number of the step and name of the step",
       "description": "What should be done"
     }
