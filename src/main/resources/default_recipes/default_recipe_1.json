@@ -8,14 +8,15 @@
   },
   "title": "Caprese Salad",
   "short_description": "Caprese Salad is a simple and elegant Italian dish, layering fresh mozzarella, ripe tomatoes, and basil, drizzled with olive oil and balsamic glaze. \n• 3 large ripe tomatoes \n• 200g fresh mozzarella cheese \n• Fresh basil leaves \n• 2 tablespoons olive oil \n• Balsamic glaze \n• Salt and pepper to taste",
+  "cooking_time": 10,
   "steps": [
     {
-      "delay": 0,
+      "offset": 0,
       "title": "1. Slice Ingredients",
       "description": "• Slice 3 large ripe tomatoes into even rounds. \n• Slice 200g of fresh mozzarella cheese into even rounds. \n• Wash and dry a handful of fresh basil leaves."
     },
     {
-      "delay": 5,
+      "offset": 5,
       "title": "2. Assemble Salad",
       "description": "• Layer the tomato and mozzarella slices alternately on a platter. \n• Add a basil leaf between each layer. \n• Drizzle with 2 tablespoons of olive oil and balsamic glaze. \n• Sprinkle with salt and pepper to taste."
     }

@@ -1,4 +1,4 @@
-package com.belogrudovw.cookingbot.domain.properties;
+package com.belogrudovw.cookingbot.domain.displayable;
 
 import java.util.Arrays;
 
@@ -10,8 +10,9 @@ public enum Languages implements Displayable {
     DE("Deutsch", "🇩🇪"),
     FR("French", "🇫🇷"),
     CH("Chinese", "🇨🇳"),
-    RU("Русский", "🇷🇺"),
-    EN("English", "🇬🇧");
+    RU("Russian", "🇷🇺"),
+    UA("Ukrainian", "🇺🇦"),
+    EN("English", "🇬🇧/🇺🇸");
 
     @JsonValue
     private final String text;

@@ -1,68 +1,54 @@
 package com.belogrudovw.cookingbot.handler.callback;
 
 import com.belogrudovw.cookingbot.domain.Chat;
-import com.belogrudovw.cookingbot.domain.buttons.CallbackButton;
 import com.belogrudovw.cookingbot.domain.buttons.DifficultyButtons;
-import com.belogrudovw.cookingbot.domain.properties.Difficulties;
-import com.belogrudovw.cookingbot.domain.screen.DefaultScreen;
+import com.belogrudovw.cookingbot.domain.displayable.Difficulties;
+import com.belogrudovw.cookingbot.domain.screen.DefaultScreens;
 import com.belogrudovw.cookingbot.domain.screen.Screen;
+import com.belogrudovw.cookingbot.service.ChatService;
 import com.belogrudovw.cookingbot.service.OrderService;
 import com.belogrudovw.cookingbot.service.ResponseService;
-import com.belogrudovw.cookingbot.storage.Storage;
-import com.belogrudovw.cookingbot.telegram.domain.Keyboard;
 import com.belogrudovw.cookingbot.telegram.domain.UserAction;
 
-import java.util.Arrays;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import lombok.RequiredArgsConstructor;
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import static com.belogrudovw.cookingbot.util.KeyboardUtil.buildDefaultKeyboard;
-
 @Slf4j
 @Component
-@RequiredArgsConstructor
-public class SetupDifficultyCallbackHandler implements CallbackHandler {
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+public class SetupDifficultyCallbackHandler extends AbstractCallbackHandler {
 
-    private static final Screen SCREEN = DefaultScreen.SETUP_DIFFICULTIES;
+    static final Screen CURRENT_SCREEN = DefaultScreens.SETUP_DIFFICULTIES;
 
-    private final Storage<Long, Chat> chatStorage;
-    private final OrderService orderService;
-    private final ResponseService responseService;
+    ChatService chatService;
+    OrderService orderService;
+
+    public SetupDifficultyCallbackHandler(ResponseService responseService, ChatService chatService, OrderService orderService) {
+        super(responseService, chatService);
+        this.chatService = chatService;
+        this.orderService = orderService;
+    }
 
     @Override
     public Set<String> getSupported() {
-        return Arrays.stream(SCREEN.getButtons())
-                .map(CallbackButton::getCallbackData)
-                .collect(Collectors.toSet());
+        return setOfCallbackDataFrom(CURRENT_SCREEN);
     }
 
     @Override
-    public void handle(UserAction action) {
-        log.debug("Difficulty handler called for: {}", action);
-        long chatId = action.getChatId();
-        UserAction.CallbackQuery callbackQuery = action.callbackQuery().orElseThrow();
-        chatStorage.get(chatId)
-                .map(chat -> mapToScreen(chat, callbackQuery))
-                .ifPresent(nextScreen -> respond(nextScreen, chatId, callbackQuery));
-    }
-
-    private Screen mapToScreen(Chat chat, UserAction.CallbackQuery callbackQuery) {
+    public void handleCallback(Chat chat, UserAction.CallbackQuery callbackQuery) {
         var button = DifficultyButtons.valueOf(callbackQuery.data());
-        if (DifficultyButtons.SETUP_DIFFICULTY_BACK == button) {
-            return orderService.prevScreen(SCREEN);
-        } else {
-            chat.getProperty().setDifficulty(Difficulties.from(button.getText()));
-            chatStorage.save(chat);
-            return orderService.nextScreen(SCREEN);
-        }
-    }
-
-    private void respond(Screen nextScreen, long chatId, UserAction.CallbackQuery callbackQuery) {
-        Keyboard keyboard = buildDefaultKeyboard(nextScreen.getButtons());
-        responseService.editMessage(chatId, callbackQuery.message().messageId(), nextScreen.getText(), keyboard);
+        Screen screen = switch (button) {
+            case SETUP_DIFFICULTY_15, SETUP_DIFFICULTY_30, SETUP_DIFFICULTY_60, SETUP_DIFFICULTY_INFINITY -> {
+                chat.getProperty().setDifficulty(Difficulties.from(button.getText()));
+                chatService.save(chat);
+                yield orderService.nextScreen(CURRENT_SCREEN);
+            }
+            case SETUP_DIFFICULTY_BACK -> orderService.prevScreen(CURRENT_SCREEN);
+        };
+        respond(chat.getId(), callbackQuery.message().messageId(), screen);
     }
 }

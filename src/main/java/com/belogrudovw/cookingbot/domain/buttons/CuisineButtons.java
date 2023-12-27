@@ -1,12 +1,13 @@
 package com.belogrudovw.cookingbot.domain.buttons;
 
-import com.belogrudovw.cookingbot.domain.properties.Cuisines;
-import com.belogrudovw.cookingbot.domain.properties.Displayable;
-import com.belogrudovw.cookingbot.domain.enums.Navigational;
+import com.belogrudovw.cookingbot.domain.displayable.Cuisines;
+import com.belogrudovw.cookingbot.domain.displayable.Displayable;
+import com.belogrudovw.cookingbot.domain.displayable.Navigational;
 
 import lombok.Getter;
 
 @Getter
+@Deprecated
 public enum CuisineButtons implements CallbackButton {
 
     SETUP_CUISINE_IT(Cuisines.IT),

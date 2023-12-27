@@ -1,4 +1,4 @@
-package com.belogrudovw.cookingbot.domain.enums;
+package com.belogrudovw.cookingbot.domain;
 
 public enum GenerationMode {
     EXISTING,

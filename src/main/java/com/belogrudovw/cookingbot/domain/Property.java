@@ -1,6 +1,16 @@
-package com.belogrudovw.cookingbot.domain.properties;
+package com.belogrudovw.cookingbot.domain;
 
-import lombok.*;
+import com.belogrudovw.cookingbot.domain.displayable.Cuisines;
+import com.belogrudovw.cookingbot.domain.displayable.Difficulties;
+import com.belogrudovw.cookingbot.domain.displayable.Languages;
+import com.belogrudovw.cookingbot.domain.displayable.Lightness;
+import com.belogrudovw.cookingbot.domain.displayable.MeasurementUnits;
+
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 @Data
@@ -20,5 +30,9 @@ public final class Property {
                 && (this.lightness == target.lightness || target.lightness == Lightness.ANY)
                 && this.units == target.units
                 && (this.difficulty == target.difficulty || target.difficulty == Difficulties.MINUTES_INFINITY);
+    }
+
+    public boolean isEmpty() {
+        return language == null || lightness == null || units == null || difficulty == null;
     }
 }

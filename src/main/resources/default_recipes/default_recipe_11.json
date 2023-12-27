@@ -7,19 +7,20 @@
   },
   "title": "Kartoffelsalat",
   "short_description": "Kartoffelsalat ist ein beliebter deutscher Klassiker. Diese Variante ist mit einer Essig-Öl-Marinade zubereitet. \n• 1kg festkochende Kartoffeln \n• 1 kleine Zwiebel \n• 3 EL Weinessig \n• 5 EL Olivenöl \n• 1 TL Senf \n• Salz und Pfeffer \n• Frische Kräuter, z.B. Petersilie",
+  "cooking_time": 35,
   "steps": [
     {
-      "delay": 0,
+      "offset": 0,
       "title": "1. Kartoffeln kochen",
       "description": "Kochen Sie die Kartoffeln in Salzwasser, bis sie weich sind. Lassen Sie sie abkühlen und schneiden Sie sie dann in Scheiben."
     },
     {
-      "delay": 20,
+      "offset": 20,
       "title": "2. Marinade vorbereiten",
       "description": "Hacken Sie die Zwiebel fein. Verquirlen Sie in einer Schüssel den Weinessig, das Olivenöl und den Senf. Würzen Sie mit Salz und Pfeffer."
     },
     {
-      "delay": 35,
+      "offset": 35,
       "title": "3. Salat zusammenstellen",
       "description": "Geben Sie die Kartoffelscheiben und die Zwiebel in die Schüssel. Mischen Sie alles gut mit der Marinade. Lassen Sie den Salat vor dem Servieren ziehen und garnieren Sie ihn mit frischen Kräutern."
     }

@@ -8,19 +8,20 @@
   },
   "title": "Spaghetti Aglio e Olio",
   "short_description": "Spaghetti Aglio e Olio is a traditional Italian pasta dish from Naples, featuring spaghetti, garlic, olive oil, red chili flakes, and parsley for a simple yet rich flavor. \n• 400g spaghetti \n• 6 tablespoons olive oil \n• 4 cloves garlic, minced \n• 1 teaspoon red chili flakes \n• Fresh parsley, chopped",
+  "cooking_time": 15,
   "steps": [
     {
-      "delay": 0,
+      "offset": 0,
       "title": "Cook Pasta",
       "description": "• Bring a large pot of salted water to a boil. \n• Add 400g of spaghetti and cook until al dente, about 8-10 minutes. \n• Reserve 1 cup of pasta water before draining."
     },
     {
-      "delay": 10,
+      "offset": 10,
       "title": "Prepare Garlic Oil",
       "description": "• Heat 6 tablespoons of olive oil in a large skillet. \n• Add 4 minced garlic cloves and 1 teaspoon of red chili flakes. \n• Cook on low heat until the garlic is golden brown."
     },
     {
-      "delay": 15,
+      "offset": 15,
       "title": "Combine and Serve",
       "description": "• Add the drained spaghetti to the skillet with garlic oil. \n• Toss well to coat, adding reserved pasta water as needed to moisten. \n• Garnish with chopped parsley and serve immediately."
     }

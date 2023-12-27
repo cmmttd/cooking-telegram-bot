@@ -1,8 +1,8 @@
 package com.belogrudovw.cookingbot.domain.buttons;
 
-import com.belogrudovw.cookingbot.domain.properties.Displayable;
-import com.belogrudovw.cookingbot.domain.enums.Navigational;
-import com.belogrudovw.cookingbot.domain.properties.Difficulties;
+import com.belogrudovw.cookingbot.domain.displayable.Displayable;
+import com.belogrudovw.cookingbot.domain.displayable.Navigational;
+import com.belogrudovw.cookingbot.domain.displayable.Difficulties;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;

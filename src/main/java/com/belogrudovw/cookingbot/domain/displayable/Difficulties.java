@@ -1,4 +1,4 @@
-package com.belogrudovw.cookingbot.domain.properties;
+package com.belogrudovw.cookingbot.domain.displayable;
 
 import java.util.Arrays;
 
