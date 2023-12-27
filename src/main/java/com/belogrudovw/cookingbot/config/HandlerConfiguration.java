@@ -1,4 +1,4 @@
-package com.belogrudovw.cookingbot.configuration;
+package com.belogrudovw.cookingbot.config;
 
 import com.belogrudovw.cookingbot.handler.callback.CallbackHandler;
 import com.belogrudovw.cookingbot.handler.callback.DynamicCallbackHandler;

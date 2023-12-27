@@ -83,7 +83,7 @@ public class SpinPickRecipeCallbackHandler implements CallbackHandler {
                 chat.setCurrentRecipe(recipe);
                 chat.setCookingProgress(cookingProgress + 1);
                 chatStorage.save(chat);
-//                delayedTaskService.createPostponedTask(chat.getId())
+                // TODO: 19/12/2023 Issue#5 - Add something like delayedTaskService.createPostponedTask(chat.getId())
                 yield CustomScreen.builder()
                         .buttons(nextScreenTemplate.getButtons())
                         .text(escapeCharacters("*" + step.title() + "*" + "\n" + step.description()))

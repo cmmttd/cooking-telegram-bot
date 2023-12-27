@@ -38,11 +38,13 @@ public class DefaultHandler implements Handler {
         responseService.sendMessage(chatId, screen.getText(), buildDefaultKeyboard(screen.getButtons()));
     }
 
+    // TODO: 20/12/2023 Move it into chat service
     private Optional<Screen> createNewChat(long chatId) {
         Chat newChat = new Chat(chatId);
         Screen firstScreen = orderService.getFirst();
         newChat.setPivotScreen(firstScreen);
         chatStorage.save(newChat);
+        log.info("New user saved: {}", chatId);
         return Optional.of(firstScreen);
     }
 }

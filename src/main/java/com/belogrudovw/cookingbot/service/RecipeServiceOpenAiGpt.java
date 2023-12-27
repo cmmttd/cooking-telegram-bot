@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Iterator;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,7 +25,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class RecipeServiceOpenAiGpt implements RecipeService {
 
-    private final Storage<Long, Recipe> recipeStorage;
+    private final Storage<UUID, Recipe> recipeStorage;
 
     // TODO: 15/12/2023 Remove init
     @PostConstruct
@@ -57,7 +58,7 @@ public class RecipeServiceOpenAiGpt implements RecipeService {
     }
 
     @Override
-    public Recipe getById(long id) {
+    public Recipe getById(UUID id) {
         return recipeStorage.get(id)
                 .orElse(getStubRecipe());
     }

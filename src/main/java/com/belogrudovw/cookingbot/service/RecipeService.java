@@ -5,11 +5,12 @@ import com.belogrudovw.cookingbot.domain.Recipe;
 import com.belogrudovw.cookingbot.domain.properties.Property;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface RecipeService {
     Recipe getRandom(Chat chat);
 
-    Recipe getById(long id);
+    Recipe getById(UUID id);
 
     Recipe requestNew(Property property);
 

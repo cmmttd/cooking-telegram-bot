@@ -12,6 +12,8 @@ import com.belogrudovw.cookingbot.storage.Storage;
 import com.belogrudovw.cookingbot.telegram.domain.Keyboard;
 import com.belogrudovw.cookingbot.telegram.domain.UserAction;
 
+import java.util.UUID;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -26,6 +28,7 @@ public class DynamicCallbackHandlerHistory implements DynamicCallbackHandler {
 
     private static final DefaultScreen SCREEN = DefaultScreen.HOME;
     private static final String HOME_HISTORY_CALLBACK_BASE = SCREEN.name() + "_";
+    private static final String CALLBACK_PATTERN = HOME_HISTORY_CALLBACK_BASE + "\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}";
 
     private final Storage<Long, Chat> chatStorage;
     private final RecipeService recipeService;
@@ -34,7 +37,7 @@ public class DynamicCallbackHandlerHistory implements DynamicCallbackHandler {
 
     @Override
     public String getPattern() {
-        return HOME_HISTORY_CALLBACK_BASE + "\\d+";
+        return CALLBACK_PATTERN;
     }
 
     @Override
@@ -48,8 +51,9 @@ public class DynamicCallbackHandlerHistory implements DynamicCallbackHandler {
     }
 
     private Screen mapToScreen(Chat chat, UserAction.CallbackQuery callbackQuery) {
+        // TODO: 20/12/2023 Wrap with try-catch
         String[] recipeIdString = callbackQuery.data().split(HOME_HISTORY_CALLBACK_BASE);
-        long recipeId = Long.parseLong(recipeIdString[1]);
+        UUID recipeId = UUID.fromString(recipeIdString[1]);
         Recipe recipe = recipeService.getById(recipeId);
         chat.setCurrentRecipe(recipe);
         chat.setCookingProgress(0);

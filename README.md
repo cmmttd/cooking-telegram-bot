@@ -1,23 +1,42 @@
-# cooking-telegram-bot
+cooking-telegram-bot
+===
+
+* [Description](#description)
+* [Useful links](#useful-links)
+* [How to run](#how-to-run)
+    * [Pre-requests](#pre-requests)
+    * [Locally by maven](#locally-by-maven)
+    * [Locally by docker](#locally-by-docker)
+    * [GCP](#gcp)
+
+## Description
+
+If you don't know what you want to cook (like I usually do)\
+Just open the bot, click "Start сooking" and just follow to notifications.
+
+## Useful links
+
 [Telegram Bot](tbd)\
 [Concept board](https://miro.com/app/board/uXjVNHdZ5Oc=/?share_link_id=42246636944)
 
-If you don't know what you want to cook (like I usually do)\
-Just click "Start сooking" and the bot will tell you when it's time for the next step.
+## How to run
 
-## How to run locally
-Pre-requests:
+### Pre-requests
+
 * [create](https://core.telegram.org/bots/features#creating-a-new-bot) the telegram bot;
-* set COOKING_BOT_TOKEN and COOKING_BOT_NAME to environment variables; 
+* set COOKING_BOT_TOKEN and COOKING_BOT_NAME to environment variables;
 * obtain own public and secured https url and set it to WEBHOOK_URL also (eg ngrok http 8083);
 
+### Locally by maven
+
 ```shell
-$ mvn package
-$ java -jar /target/*.jar
+mvnw sping-boot:run
 ```
 
-## How to run locally by docker
+### Locally by docker
+
 tbd
 
-## How to run in GCP
+### GCP
+
 tbd

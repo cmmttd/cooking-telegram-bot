@@ -51,7 +51,7 @@ public class SetupUnitsCallbackHandler implements CallbackHandler {
                 .ifPresent(nextScreen -> respond(nextScreen, chatId, callbackQuery));
     }
 
-    // TODO: 18/12/2023 Split business callbacks from back
+    // TODO: 18/12/2023 Split business callbacks from back callback
     private Screen mapToScreen(Chat chat, UserAction.CallbackQuery callbackQuery) {
         var button = MeasurementUnitButtons.valueOf(callbackQuery.data());
         if (SETUP_UNITS_BACK == button) {
