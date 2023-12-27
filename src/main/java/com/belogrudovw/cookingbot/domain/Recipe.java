@@ -3,6 +3,7 @@ package com.belogrudovw.cookingbot.domain;
 import com.belogrudovw.cookingbot.domain.properties.Property;
 
 import java.util.List;
+import java.util.UUID;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -13,7 +14,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public final class Recipe {
-    long id;
+    UUID id;
     Property property;
     String title;
     String shortDescription;

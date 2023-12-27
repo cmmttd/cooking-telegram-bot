@@ -71,6 +71,7 @@ public class CookingCallbackHandler implements CallbackHandler {
                             .text(escapeCharacters("*" + step.title() + "*" + "\n" + step.description()))
                             .build();
                 } else {
+                    log.info("User from chat {} complete the recipe {}", chat.getId(), recipe.getId());
                     CallbackButton[] buttons = {CustomCallbackButton.builder()
                             .text(escapeCharacters("💕"))
                             .callbackData("SUCCESS")

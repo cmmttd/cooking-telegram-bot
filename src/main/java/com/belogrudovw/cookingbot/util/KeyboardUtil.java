@@ -9,7 +9,7 @@ import java.util.List;
 
 import lombok.experimental.UtilityClass;
 
-// TODO: 15/12/2023 Remove this class
+// TODO: 15/12/2023 Move this class
 @UtilityClass
 public final class KeyboardUtil {
     public static final int ROW_LENGTH_LIMIT = 15;
