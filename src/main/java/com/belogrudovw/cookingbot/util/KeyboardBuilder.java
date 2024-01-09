@@ -1,8 +1,9 @@
 package com.belogrudovw.cookingbot.util;
 
 import com.belogrudovw.cookingbot.domain.buttons.CallbackButton;
-import com.belogrudovw.cookingbot.telegram.domain.Button;
-import com.belogrudovw.cookingbot.telegram.domain.Keyboard;
+import com.belogrudovw.cookingbot.domain.displayable.Navigational;
+import com.belogrudovw.cookingbot.domain.telegram.Button;
+import com.belogrudovw.cookingbot.domain.telegram.Keyboard;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +22,7 @@ public final class KeyboardBuilder {
         int lineLen = 0;
         for (CallbackButton button : values) {
             int buttonLen = button.getText().length();
-            if ((lineLen != 0 && buttonLen + lineLen > ROW_LENGTH_LIMIT) || button.getText().equals("Back")) {
+            if ((lineLen != 0 && buttonLen + lineLen > ROW_LENGTH_LIMIT) || button.getText().equals(Navigational.BACK.getText())) {
                 keyboard.add(row);
                 row = new ArrayList<>();
                 lineLen = 0;

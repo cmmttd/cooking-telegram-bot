@@ -1,29 +1,39 @@
 {
-  "property": {
-    "language": "English",
-    "cuisine": "Italian",
+  "language": "Russian",
+  "properties": {
     "lightness": "Light",
     "units": "METRIC",
-    "difficulty": "15 minutes"
+    "cooking_time": 30
   },
-  "title": "Lemon Ricotta Pasta",
-  "short_description": "Lemon Ricotta Pasta is a light and creamy Italian dish, blending the zestiness of lemon with smooth ricotta, paired with pasta. \n• 350g pasta (fusilli or spaghetti) \n• 250g ricotta cheese \n• 1 lemon (zest and juice) \n• 50g grated Parmesan cheese \n• Salt and pepper to taste \n• Fresh basil or parsley for garnish",
-  "cooking_time": 15,
+  "title": "Легкий овощной салат с курицей",
+  "short_description": "Легкий овощной салат с курицей - идеальный выбор для здорового обеда или ужина, который готовится всего за 30 минут.",
+  "ingredients": [
+    "200 г куриного филе",
+    "1 свежий огурец",
+    "200 г разноцветных помидоров черри",
+    "Салатные листья (любые по вкусу)",
+    "1 ст.л. оливкового масла",
+    "1 ч.л. лимонного сока",
+    "Соль и перец по вкусу"
+  ],
   "steps": [
     {
+      "index": 1,
       "offset": 0,
-      "title": "Cook Pasta",
-      "description": "Bring a pot of salted water to a boil. Cook 350g of your choice of pasta (like fusilli or spaghetti) until al dente, about 8-10 minutes. Reserve some pasta water before draining."
+      "title": "Подготовка ингредиентов",
+      "description": "Отварить куриное филе до готовности, остудить и нарезать небольшими кусочками. Огурец нарезать тонкими ломтиками, помидоры черри разрезать пополам. Вымыть и обсушить салатные листья."
     },
     {
-      "offset": 10,
-      "title": "Make Lemon Ricotta Sauce",
-      "description": "In a bowl, mix 250g of ricotta cheese with the zest and juice of 1 lemon, 50g of grated Parmesan cheese, and salt and pepper to taste. Thin the sauce with a bit of the reserved pasta water to get a creamy consistency."
-    },
-    {
+      "index": 2,
       "offset": 15,
-      "title": "Combine and Serve",
-      "description": "Toss the cooked pasta with the lemon ricotta sauce. Adjust the seasoning as needed, and add more pasta water if necessary. Serve garnished with extra Parmesan and fresh basil or parsley."
+      "title": "Сборка салата",
+      "description": "На большой тарелке выложить салатные листья, сверху равномерно распределить огурец, помидоры и курицу."
+    },
+    {
+      "index": 3,
+      "offset": 25,
+      "title": "Заправка и подача",
+      "description": "Смешать оливковое масло с лимонным соком, солью и перцем. Полить салат полученной заправкой перед подачей."
     }
   ]
 }

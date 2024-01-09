@@ -8,13 +8,22 @@ logging:
   level:
     root: ERROR
     com.belogrudovw.cookingbot: info
+open-ai:
+  api-url: https://api.openai.com/v1/chat/completions
+  token: ${OPENAI_TOKEN}
+  conversation:
+    models:
+      cheap: gpt-3.5-turbo-1106
+      wise: gpt-4-1106-preview
+    temperature: 1
+    max-tokens: 4000
 telegram:
+  api-url: https://api.telegram.org/bot
+  webhook-url: ${WEBHOOK_URL}
   bot:
     token: ${COOKING_BOT_TOKEN}
     name: ${COOKING_BOT_NAME}
     path: /webhook/
-  webhook-url: ${WEBHOOK_URL}
-  telegram-api-url: https://api.telegram.org/bot
 ---
 spring:
   config:

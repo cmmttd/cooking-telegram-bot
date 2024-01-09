@@ -1,7 +1,7 @@
 package com.belogrudovw.cookingbot.handler.message;
 
 import com.belogrudovw.cookingbot.handler.Handler;
-import com.belogrudovw.cookingbot.telegram.domain.UserAction;
+import com.belogrudovw.cookingbot.domain.telegram.UserAction;
 
 import java.util.Set;
 

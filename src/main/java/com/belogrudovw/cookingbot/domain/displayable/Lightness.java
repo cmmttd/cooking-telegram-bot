@@ -22,7 +22,7 @@ public enum Lightness implements Displayable {
 
     public static Lightness from(String string) {
         return Arrays.stream(values())
-                .filter(value -> value.getText().equals(string))
+                .filter(value -> value.getText().equalsIgnoreCase(string))
                 .findFirst()
                 .orElse(ANY);
     }

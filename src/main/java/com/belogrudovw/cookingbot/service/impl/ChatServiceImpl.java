@@ -41,19 +41,6 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public Optional<Recipe.CookingStep> nextRecipeStep(Chat chat) {
-        Recipe recipe = chat.getCurrentRecipe();
-        int cookingProgress = chat.getCookingProgress();
-        if (recipe.getSteps().size() > cookingProgress) {
-            Recipe.CookingStep nextStep = recipe.getSteps().get(cookingProgress);
-            chat.setCookingProgress(cookingProgress + 1);
-            chatStorage.save(chat);
-            return Optional.of(nextStep);
-        }
-        return Optional.empty();
-    }
-
-    @Override
     public void setNewRecipe(Chat chat, Recipe recipe) {
         chat.setCurrentRecipe(recipe);
         chat.setCookingProgress(0);
@@ -68,5 +55,18 @@ public class ChatServiceImpl implements ChatService {
         chatStorage.save(newChat);
         log.info("New user saved: {}", chatId);
         return newChat;
+    }
+
+    @Override
+    public Optional<Recipe.Step> incrementProgressAndGetStep(Chat chat) {
+        Recipe recipe = chat.getCurrentRecipe();
+        int cookingProgress = chat.getCookingProgress();
+        if (recipe.getSteps().size() > cookingProgress) {
+            Recipe.Step nextStep = recipe.getSteps().get(cookingProgress);
+            chat.setCookingProgress(cookingProgress + 1);
+            chatStorage.save(chat);
+            return Optional.of(nextStep);
+        }
+        return Optional.empty();
     }
 }

@@ -8,8 +8,8 @@ import lombok.Getter;
 @Getter
 public enum CookingButtons implements CallbackButton {
 
-    COOKING_NEXT(Navigational.NEXT),
-    COOKING_CANCEL(Navigational.CANCEL);
+    COOKING_CANCEL(Navigational.CANCEL),
+    COOKING_NEXT(Navigational.NEXT);
 
     private final String text;
 

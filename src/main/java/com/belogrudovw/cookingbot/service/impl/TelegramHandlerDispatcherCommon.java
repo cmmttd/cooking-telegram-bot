@@ -6,7 +6,7 @@ import com.belogrudovw.cookingbot.handler.callback.DynamicCallbackHandler;
 import com.belogrudovw.cookingbot.handler.message.MessageHandler;
 import com.belogrudovw.cookingbot.service.ChatService;
 import com.belogrudovw.cookingbot.service.TelegramHandlerDispatcher;
-import com.belogrudovw.cookingbot.telegram.domain.UserAction;
+import com.belogrudovw.cookingbot.domain.telegram.UserAction;
 
 import java.util.Map;
 import java.util.Optional;

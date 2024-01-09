@@ -1,8 +1,17 @@
 package com.belogrudovw.cookingbot.domain;
 
+import com.belogrudovw.cookingbot.domain.displayable.Languages;
+import com.belogrudovw.cookingbot.domain.displayable.Lightness;
+import com.belogrudovw.cookingbot.domain.displayable.MeasurementUnits;
+
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,24 +23,55 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public final class Recipe {
     UUID id;
-    Property property;
+    @NotNull
+    @NotEmpty
     String title;
+    @NotNull
+    RecipeProperties properties;
+    @NotNull
+    @NotEmpty
     String shortDescription;
-    int cookingTime;
-    List<CookingStep> steps;
+    @NotNull
+    List<String> ingredients;
+    @NotNull
+    List<Step> steps;
+
+    // TODO: 07/01/2024 Replace single lang by multy-lang string
+    @NotNull
+    Languages language;
 
     @Override
     public String toString() {
-        return "*%s - %d min*%n%s".formatted(title, cookingTime, shortDescription);
+        String stepsString = steps.stream()
+                .map(step -> "(+" + step.offset() + " min) " + step.title())
+                .collect(Collectors.joining("\n • ", " • ", ""));
+        String ingredientsString = ingredients.stream()
+                .collect(Collectors.joining("\n • ", " • ", ""));
+        return """
+                *%s - %s*
+                %s
+                ---
+                %s
+                ---
+                %s
+                """
+                .formatted(title, properties.cookingTime, shortDescription, ingredientsString, stepsString);
     }
 
-    public record CookingStep(int offset, String title, String description) {
+    public record Step(@Positive int index,
+                       @Positive int offset,
+                       @NotNull @NotEmpty String title,
+                       @NotNull @NotEmpty String description) {
         @Override
         public String toString() {
-            return "*%s*%n%s".formatted(title, description);
+            return "*%d. %s*%n%s".formatted(index, title, description);
         }
+    }
+
+    public record RecipeProperties(@NotNull Lightness lightness, @NotNull MeasurementUnits units, @Positive int cookingTime) {
     }
 }

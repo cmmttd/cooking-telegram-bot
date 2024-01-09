@@ -13,7 +13,7 @@ public interface ChatService {
 
     void save(Chat chat);
 
-    Optional<Recipe.CookingStep> nextRecipeStep(Chat chatId);
-
     void setNewRecipe(Chat chat, Recipe recipe);
+
+    Optional<Recipe.Step> incrementProgressAndGetStep(Chat chatId);
 }

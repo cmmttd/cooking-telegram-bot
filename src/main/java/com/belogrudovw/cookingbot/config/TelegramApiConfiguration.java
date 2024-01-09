@@ -1,4 +1,4 @@
-package com.belogrudovw.cookingbot.telegram;
+package com.belogrudovw.cookingbot.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -11,8 +11,8 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 public class TelegramApiConfiguration {
 
     @Bean
-    public WebClient webClient(TelegramProperties properties) {
-        String url = properties.telegramApiUrl() + properties.bot().token();
+    public WebClient telegramWebClient(TelegramProperties properties) {
+        String url = properties.apiUrl() + properties.bot().token();
         DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(url);
         factory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.NONE);
         return WebClient.builder()

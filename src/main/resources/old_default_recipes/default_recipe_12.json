@@ -1,17 +1,16 @@
 {
-  "property": {
-    "language": "Russian",
+  "language": "Russian",
+  "properties": {
     "lightness": "Light",
     "units": "METRIC",
-    "difficulty": "30 minutes"
+    "cooking_time": 5
   },
   "title": "Салат из огурца",
   "short_description": "• Огурец",
-  "cooking_time": 10,
   "steps": [
     {
       "offset": 0,
-      "title": "1. Подготовка ингредиентов",
+      "title": "Подготовка ингредиентов",
       "description": "Нарежьте огурец"
     }
   ]

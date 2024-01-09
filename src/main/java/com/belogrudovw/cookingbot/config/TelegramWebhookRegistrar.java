@@ -1,4 +1,4 @@
-package com.belogrudovw.cookingbot.telegram;
+package com.belogrudovw.cookingbot.config;
 
 import com.belogrudovw.cookingbot.util.CustomUriBuilder;
 
@@ -16,10 +16,10 @@ import reactor.core.publisher.Mono;
 @Component
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class WebhookRegistrar {
+public class TelegramWebhookRegistrar {
 
     TelegramProperties properties;
-    WebClient client;
+    WebClient telegramWebClient;
 
     @PostConstruct
     void setup() {
@@ -36,7 +36,7 @@ public class WebhookRegistrar {
     }
 
     private Mono<String> resetWebhook() {
-        return client.post()
+        return telegramWebClient.post()
                 .uri(uriBuilder -> uriBuilder
                         .path("/deleteWebhook")
                         .queryParam("drop_pending_updates", true)
@@ -50,7 +50,7 @@ public class WebhookRegistrar {
                 .path("/setWebhook")
                 .queryParam("url", properties.webhookUrl() + properties.bot().path())
                 .build();
-        return client.post()
+        return telegramWebClient.post()
                 .uri(uri)
                 .exchangeToMono(resp -> resp.bodyToMono(String.class))
                 .doOnError(err -> log.error("Telegram registration webhook failed"));

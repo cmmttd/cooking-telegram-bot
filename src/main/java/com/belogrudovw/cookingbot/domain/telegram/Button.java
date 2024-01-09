@@ -1,4 +1,4 @@
-package com.belogrudovw.cookingbot.telegram.domain;
+package com.belogrudovw.cookingbot.domain.telegram;
 
 public record Button(String text, String callbackData) {
     @Override

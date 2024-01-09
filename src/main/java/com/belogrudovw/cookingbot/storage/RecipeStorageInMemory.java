@@ -7,36 +7,39 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
+import jakarta.validation.Valid;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
 
 @Slf4j
 @Component
-public class InMemoryRecipeStorage implements Storage<UUID, Recipe> {
+@Validated
+public class RecipeStorageInMemory implements Storage<UUID, Recipe> {
 
-    private static final Map<UUID, Recipe> CACHE = new ConcurrentHashMap<>();
+    private final Map<UUID, Recipe> recipes = new ConcurrentHashMap<>();
 
     @Override
-    public void save(Recipe recipe) {
+    public void save(@Valid Recipe recipe) {
         if (recipe.getId() == null) {
             recipe.setId(UUID.randomUUID());
         }
-        CACHE.putIfAbsent(recipe.getId(), recipe);
+        recipes.putIfAbsent(recipe.getId(), recipe);
     }
 
     @Override
     public Optional<Recipe> get(UUID id) {
-        return Optional.ofNullable(CACHE.get(id));
+        return Optional.ofNullable(recipes.get(id));
     }
 
     @Override
     public boolean contains(UUID id) {
-        return CACHE.containsKey(id);
+        return recipes.containsKey(id);
     }
 
     @Override
     public Stream<Recipe> all() {
-        return CACHE.values().stream();
+        return recipes.values().stream();
     }
 }

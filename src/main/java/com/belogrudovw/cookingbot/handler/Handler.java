@@ -1,6 +1,6 @@
 package com.belogrudovw.cookingbot.handler;
 
-import com.belogrudovw.cookingbot.telegram.domain.UserAction;
+import com.belogrudovw.cookingbot.domain.telegram.UserAction;
 
 public interface Handler {
     void handle(UserAction action);

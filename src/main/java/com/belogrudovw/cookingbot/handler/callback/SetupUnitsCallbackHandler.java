@@ -8,7 +8,7 @@ import com.belogrudovw.cookingbot.domain.screen.Screen;
 import com.belogrudovw.cookingbot.service.ChatService;
 import com.belogrudovw.cookingbot.service.OrderService;
 import com.belogrudovw.cookingbot.service.ResponseService;
-import com.belogrudovw.cookingbot.telegram.domain.UserAction;
+import com.belogrudovw.cookingbot.domain.telegram.UserAction;
 
 import java.util.Set;
 
@@ -44,7 +44,7 @@ public class SetupUnitsCallbackHandler extends AbstractCallbackHandler {
         Screen screen = switch (button) {
             case SETUP_UNITS_IMPERIAL,
                     SETUP_UNITS_METRIC -> {
-                chat.getProperty().setUnits(MeasurementUnits.from(button.getText()));
+                chat.getRequestProperties().setUnits(MeasurementUnits.from(button.getText()));
                 chatService.save(chat);
                 yield orderService.nextScreen(CURRENT_SCREEN);
             }

@@ -8,7 +8,7 @@ import com.belogrudovw.cookingbot.domain.screen.Screen;
 import com.belogrudovw.cookingbot.service.ChatService;
 import com.belogrudovw.cookingbot.service.OrderService;
 import com.belogrudovw.cookingbot.service.ResponseService;
-import com.belogrudovw.cookingbot.telegram.domain.UserAction;
+import com.belogrudovw.cookingbot.domain.telegram.UserAction;
 
 import java.util.Set;
 
@@ -43,7 +43,7 @@ public class SetupDifficultyCallbackHandler extends AbstractCallbackHandler {
         var button = DifficultyButtons.valueOf(callbackQuery.data());
         Screen screen = switch (button) {
             case SETUP_DIFFICULTY_15, SETUP_DIFFICULTY_30, SETUP_DIFFICULTY_60, SETUP_DIFFICULTY_INFINITY -> {
-                chat.getProperty().setDifficulty(Difficulties.from(button.getText()));
+                chat.getRequestProperties().setDifficulty(Difficulties.from(button.getText()));
                 chatService.save(chat);
                 yield orderService.nextScreen(CURRENT_SCREEN);
             }

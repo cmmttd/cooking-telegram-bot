@@ -3,7 +3,7 @@ package com.belogrudovw.cookingbot.handler;
 import com.belogrudovw.cookingbot.domain.screen.Screen;
 import com.belogrudovw.cookingbot.service.ChatService;
 import com.belogrudovw.cookingbot.service.ResponseService;
-import com.belogrudovw.cookingbot.telegram.domain.UserAction;
+import com.belogrudovw.cookingbot.domain.telegram.UserAction;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

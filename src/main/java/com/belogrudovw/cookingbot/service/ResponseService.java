@@ -1,6 +1,6 @@
 package com.belogrudovw.cookingbot.service;
 
-import com.belogrudovw.cookingbot.telegram.domain.Keyboard;
+import com.belogrudovw.cookingbot.domain.telegram.Keyboard;
 
 public interface ResponseService {
     void sendMessage(long chatId, String text, Keyboard keyboard);

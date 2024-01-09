@@ -1,8 +1,8 @@
 package com.belogrudovw.cookingbot.error;
 
-public class RecipeNotFoundException extends RuntimeException {
+public class RecipeNotFoundException extends IllegalChatStateException {
 
-    public RecipeNotFoundException(String message) {
-        super(message);
+    public RecipeNotFoundException(long chatId, String message) {
+        super(chatId, message);
     }
 }

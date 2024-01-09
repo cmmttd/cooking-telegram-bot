@@ -12,21 +12,18 @@ import lombok.experimental.FieldDefaults;
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Chat {
-
     long id;
-    int requestLimitCount;
     GenerationMode mode;
     Recipe currentRecipe;
     int cookingProgress;
     List<Recipe> history;
-    Property property;
+    RequestProperties requestProperties;
     Screen pivotScreen;
 
     public Chat(long id) {
         this.id = id;
-        this.requestLimitCount = 3;
         this.history = new ArrayList<>();
-        this.property = Property.builder().build();
+        this.requestProperties = RequestProperties.builder().build();
         this.cookingProgress = 0;
     }
 
