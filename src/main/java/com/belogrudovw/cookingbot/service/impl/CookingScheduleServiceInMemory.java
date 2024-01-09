@@ -2,16 +2,19 @@ package com.belogrudovw.cookingbot.service.impl;
 
 import com.belogrudovw.cookingbot.domain.Chat;
 import com.belogrudovw.cookingbot.domain.Recipe;
+import com.belogrudovw.cookingbot.domain.buttons.CallbackButton;
 import com.belogrudovw.cookingbot.domain.buttons.CookingButtons;
 import com.belogrudovw.cookingbot.domain.screen.DefaultScreens;
+import com.belogrudovw.cookingbot.domain.telegram.Keyboard;
+import com.belogrudovw.cookingbot.error.RecipeNotFoundException;
 import com.belogrudovw.cookingbot.service.ChatService;
 import com.belogrudovw.cookingbot.service.CookingScheduleService;
 import com.belogrudovw.cookingbot.service.RecipeService;
 import com.belogrudovw.cookingbot.service.ResponseService;
-import com.belogrudovw.cookingbot.telegram.domain.Keyboard;
 
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -46,7 +49,7 @@ public class CookingScheduleServiceInMemory implements CookingScheduleService {
     ResponseService responseService;
     RecipeService recipeService;
 
-    // TODO: 29/12/2023 Rethink all approach for delayed tasks execution
+    // TODO: 29/12/2023 Issue#18 Rethink all approach for delayed tasks execution
     //  1. perhaps, do not duplicate logic and use callback handler as reference
     @Override
     public void scheduleNexStep(Chat chat) {
@@ -54,24 +57,22 @@ public class CookingScheduleServiceInMemory implements CookingScheduleService {
         UUID recipeId = chat.getCurrentRecipe().getId();
         long chatId = chat.getId();
         timestampsByChatId.put(chatId, new HashSet<>());
-        List<Recipe.CookingStep> steps = chat.getCurrentRecipe().getSteps();
+        List<Recipe.Step> steps = chat.getCurrentRecipe().getSteps();
         int cookingProgress = chat.getCookingProgress();
         if (cookingProgress < steps.size()) {
             long prevStepOffset = cookingProgress > 0 ? steps.get(cookingProgress - 1).offset() : 0;
             long baseOffset = TimeUnit.MINUTES.toMillis(prevStepOffset);
+//            long baseOffset = TimeUnit.MINUTES.toMillis(prevStepOffset) / 100;
             long nowMillis = System.currentTimeMillis() - baseOffset;
             for (int i = cookingProgress; i < steps.size(); i++) {
-                Recipe.CookingStep step = steps.get(i);
+                Recipe.Step step = steps.get(i);
                 long nextStepOffsetMillis = TimeUnit.MINUTES.toMillis(step.offset());
+//                long nextStepOffsetMillis = TimeUnit.MINUTES.toMillis(step.offset()) / 100;
                 long taskStartTime = nowMillis + nextStepOffsetMillis;
                 tasksTimeline.putIfAbsent(taskStartTime, new HashMap<>());
                 tasksTimeline.get(taskStartTime).put(chatId, new RecipeStepTask(recipeId, i));
                 timestampsByChatId.get(chatId).add(taskStartTime);
             }
-            log.info(">>> tasks timeline: {}", tasksTimeline.entrySet().stream()
-                    .map(x -> Instant.ofEpochMilli(x.getKey()).atZone(ZoneId.systemDefault()) + " - " + x.getValue())
-                    .collect(Collectors.joining(", \n", "\n", "\n")));
-            log.info(">>> timestamps by chat: {}", timestampsByChatId);
         }
     }
 
@@ -94,8 +95,13 @@ public class CookingScheduleServiceInMemory implements CookingScheduleService {
     @Scheduled(fixedRate = 1000)
     private void scheduledTaskExecution() {
         var expiredTasks = tasksTimeline.headMap(System.currentTimeMillis());
-        if (!expiredTasks.isEmpty())
+        if (!expiredTasks.isEmpty()) {
             log.info("Start scheduler");
+            log.info(">>> timestamps by chat: {}", timestampsByChatId);
+            log.debug(">>> tasks timeline: {}", tasksTimeline.entrySet().stream()
+                    .map(x -> Instant.ofEpochMilli(x.getKey()).atZone(ZoneId.systemDefault()) + " - " + x.getValue())
+                    .collect(Collectors.joining(", \n", "\n", "\n")));
+        }
         Map<Long, UUID> completedTaskMap = new HashMap<>();
         expiredTasks.forEach((timestamp, tasks) -> {
             tasks.forEach((chatId, task) -> {
@@ -110,9 +116,10 @@ public class CookingScheduleServiceInMemory implements CookingScheduleService {
     }
 
     private void sendNextStepMessage(long chatId, RecipeStepTask task) {
-        Recipe recipe = recipeService.findById(task.recipeId());
-        Recipe.CookingStep step = recipe.getSteps().get(task.stepCount());
-        Keyboard keyboard = buildDefaultKeyboard(List.of(CookingButtons.COOKING_NEXT, CookingButtons.COOKING_CANCEL));
+        Recipe recipe = recipeService.findById(task.recipeId())
+                .orElseThrow(() -> new RecipeNotFoundException(chatId, "Recipe not found for: %s".formatted(task.recipeId())));
+        Recipe.Step step = recipe.getSteps().get(task.stepCount());
+        Keyboard keyboard = buildDefaultKeyboard(Arrays.stream(CookingButtons.values()).map(CallbackButton.class::cast).toList());
         responseService.sendMessage(chatId, step.toString(), keyboard);
     }
 

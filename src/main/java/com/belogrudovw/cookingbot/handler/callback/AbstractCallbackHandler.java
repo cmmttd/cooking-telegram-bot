@@ -4,8 +4,8 @@ import com.belogrudovw.cookingbot.domain.Chat;
 import com.belogrudovw.cookingbot.domain.screen.Screen;
 import com.belogrudovw.cookingbot.service.ChatService;
 import com.belogrudovw.cookingbot.service.ResponseService;
-import com.belogrudovw.cookingbot.telegram.domain.Keyboard;
-import com.belogrudovw.cookingbot.telegram.domain.UserAction;
+import com.belogrudovw.cookingbot.domain.telegram.Keyboard;
+import com.belogrudovw.cookingbot.domain.telegram.UserAction;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,7 @@ public abstract class AbstractCallbackHandler implements CallbackHandler {
 
     @Override
     public void handle(UserAction action) {
-        log.info("{} called for action: {}", this.getClass().getSimpleName(), action);
+        log.info("{} called for action: {}", this.getClass().getSimpleName(), action.toString().replaceAll("\n", " "));
         Chat chat = chatService.findById(action.getChatId());
         UserAction.CallbackQuery callbackQuery = action.callbackQuery().orElseThrow();
         handleCallback(chat, callbackQuery);

@@ -1,29 +1,32 @@
 {
-  "property": {
-    "language": "English",
-    "cuisine": "Italian",
+  
+  "language": "English",
+  "properties": {
     "lightness": "Light",
     "units": "METRIC",
-    "difficulty": "15 minutes"
+    "cooking_time": 15
   },
-  "title": "Spaghetti Aglio e Olio",
-  "short_description": "Spaghetti Aglio e Olio is a traditional Italian pasta dish from Naples, featuring spaghetti, garlic, olive oil, red chili flakes, and parsley for a simple yet rich flavor. \n• 400g spaghetti \n• 6 tablespoons olive oil \n• 4 cloves garlic, minced \n• 1 teaspoon red chili flakes \n• Fresh parsley, chopped",
-  "cooking_time": 15,
+  "title": "Quick and Easy Salad",
+  "short_description": "This quick and easy salad is perfect for a light and healthy meal. Packed with fresh vegetables and a zesty dressing, it's a delicious way to stay energized throughout the day.",
+  "ingredients": ["Mixed salad greens", "Cherry tomatoes", "Cucumber", "Red onion", "Feta cheese", "Olives", "Olive oil", "Lemon juice", "Salt", "Pepper"],
   "steps": [
     {
+      "index": 1,
       "offset": 0,
-      "title": "Cook Pasta",
-      "description": "• Bring a large pot of salted water to a boil. \n• Add 400g of spaghetti and cook until al dente, about 8-10 minutes. \n• Reserve 1 cup of pasta water before draining."
+      "title": "Prepare the Dressing",
+      "description": "In a small bowl, whisk together the olive oil, lemon juice, salt, and pepper. Set aside."
     },
     {
+      "index": 2,
+      "offset": 5,
+      "title": "Prepare the Salad Ingredients",
+      "description": "Wash and dry the mixed salad greens, cherry tomatoes, cucumber, and red onion. Cut the vegetables as desired and place them in a large bowl."
+    },
+    {
+      "index": 3,
       "offset": 10,
-      "title": "Prepare Garlic Oil",
-      "description": "• Heat 6 tablespoons of olive oil in a large skillet. \n• Add 4 minced garlic cloves and 1 teaspoon of red chili flakes. \n• Cook on low heat until the garlic is golden brown."
-    },
-    {
-      "offset": 15,
-      "title": "Combine and Serve",
-      "description": "• Add the drained spaghetti to the skillet with garlic oil. \n• Toss well to coat, adding reserved pasta water as needed to moisten. \n• Garnish with chopped parsley and serve immediately."
+      "title": "Assemble the Salad",
+      "description": "Add the feta cheese and olives to the bowl with the prepared vegetables. Drizzle the dressing over the salad and toss gently to combine. Serve immediately and enjoy!"
     }
   ]
 }

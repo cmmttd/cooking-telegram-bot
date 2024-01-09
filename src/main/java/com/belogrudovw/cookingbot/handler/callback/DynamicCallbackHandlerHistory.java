@@ -5,11 +5,12 @@ import com.belogrudovw.cookingbot.domain.Recipe;
 import com.belogrudovw.cookingbot.domain.screen.CustomScreen;
 import com.belogrudovw.cookingbot.domain.screen.DefaultScreens;
 import com.belogrudovw.cookingbot.domain.screen.Screen;
+import com.belogrudovw.cookingbot.error.RecipeNotFoundException;
 import com.belogrudovw.cookingbot.service.ChatService;
 import com.belogrudovw.cookingbot.service.OrderService;
 import com.belogrudovw.cookingbot.service.RecipeService;
 import com.belogrudovw.cookingbot.service.ResponseService;
-import com.belogrudovw.cookingbot.telegram.domain.UserAction;
+import com.belogrudovw.cookingbot.domain.telegram.UserAction;
 
 import java.util.UUID;
 
@@ -49,7 +50,8 @@ public class DynamicCallbackHandlerHistory extends AbstractDynamicCallbackHandle
         // TODO: 20/12/2023 Wrap with try-catch
         String[] recipeIdString = callbackQuery.data().split(HOME_HISTORY_CALLBACK_BASE);
         UUID recipeId = UUID.fromString(recipeIdString[1]);
-        Recipe recipe = recipeService.findById(recipeId);
+        Recipe recipe = recipeService.findById(recipeId)
+                .orElseThrow(() -> new RecipeNotFoundException(chat.getId(), "Recipe not found for: %s".formatted(recipeId)));
         chatService.setNewRecipe(chat, recipe);
         Screen screen = CustomScreen.builder()
                 .buttons(orderService.nextScreen(CURRENT_SCREEN).getButtons())

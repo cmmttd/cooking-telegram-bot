@@ -18,10 +18,9 @@ import lombok.Getter;
 @Getter
 public enum DefaultScreens implements Screen {
 
-    SETUP_LANG(LanguageButtons.class, "Choose the recipe's language"),
-    SETUP_LANG2(LanguageButtons.class, "Choose the recipe's language"),
-    SETUP_UNITS(MeasurementUnitButtons.class, "Choose the measurements unit format"),
-    SETUP_LIGHTNESS(LightnessButtons.class, "Pick lightness of the desired dish"),
+    SETUP_LANG(LanguageButtons.class, "Recipe's language"),
+    SETUP_UNITS(MeasurementUnitButtons.class, "Measurements unit format"),
+    SETUP_LIGHTNESS(LightnessButtons.class, "Lightness of the desired dish"),
     SETUP_DIFFICULTIES(DifficultyButtons.class, "How long do you plan to cook?"),
     HOME(HomeButtons.class, "Pick the option"),
     SPIN_PICK_RECIPE(SpinPickRecipeButtons.class, ""),

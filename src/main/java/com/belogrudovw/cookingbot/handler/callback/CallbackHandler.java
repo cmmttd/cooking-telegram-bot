@@ -4,7 +4,7 @@ import com.belogrudovw.cookingbot.domain.Chat;
 import com.belogrudovw.cookingbot.domain.buttons.CallbackButton;
 import com.belogrudovw.cookingbot.domain.screen.Screen;
 import com.belogrudovw.cookingbot.handler.Handler;
-import com.belogrudovw.cookingbot.telegram.domain.UserAction;
+import com.belogrudovw.cookingbot.domain.telegram.UserAction;
 
 import java.util.Set;
 import java.util.stream.Collectors;

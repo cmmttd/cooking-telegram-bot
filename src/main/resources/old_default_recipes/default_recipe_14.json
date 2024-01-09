@@ -1,0 +1,32 @@
+{
+  "property": {
+    "language": "English",
+    "lightness": "Light",
+    "units": "METRIC",
+    "difficulty": 15
+  },
+  "title": "Mango Salsa",
+  "short_description": "This refreshing Mango Salsa is perfect for summer gatherings and parties. It combines the sweetness of ripe mangoes with the tanginess of lime juice and the heat of jalapeno peppers. Serve it as a dip with tortilla chips or as a topping for grilled meats or fish.",
+  "steps": [
+    {
+      "offset": 0,
+      "title": "Prepare the ingredients",
+      "description": "Dice 2 ripe mangoes, 1/2 red onion, and 1 jalapeno pepper. Chop a handful of fresh cilantro leaves. Juice 1 lime."
+    },
+    {
+      "offset": 5,
+      "title": "Mix the ingredients",
+      "description": "In a bowl, combine the diced mangoes, red onion, jalapeno pepper, chopped cilantro, and lime juice. Stir well to combine."
+    },
+    {
+      "offset": 10,
+      "title": "Season and refrigerate",
+      "description": "Add salt and pepper to taste. Cover the bowl with plastic wrap and refrigerate for at least 1 hour to allow the flavors to meld together."
+    },
+    {
+      "offset": 15,
+      "title": "Serve",
+      "description": "Once chilled, give the mango salsa a final stir and transfer it to a serving bowl. Serve as a dip or a topping for grilled meats or fish."
+    }
+  ]
+}

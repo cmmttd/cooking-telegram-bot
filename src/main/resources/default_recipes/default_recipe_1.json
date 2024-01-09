@@ -1,24 +1,42 @@
 {
-  "property": {
-    "language": "English",
-    "cuisine": "Italian",
+  "language": "Chinese",
+  "properties": {
     "lightness": "Light",
     "units": "METRIC",
-    "difficulty": "15 minutes"
+    "cooking_time": 10
   },
-  "title": "Caprese Salad",
-  "short_description": "Caprese Salad is a simple and elegant Italian dish, layering fresh mozzarella, ripe tomatoes, and basil, drizzled with olive oil and balsamic glaze. \n• 3 large ripe tomatoes \n• 200g fresh mozzarella cheese \n• Fresh basil leaves \n• 2 tablespoons olive oil \n• Balsamic glaze \n• Salt and pepper to taste",
-  "cooking_time": 10,
+  "title": "蔬菜炒蛋",
+  "short_description": "这是一道简单且营养的快速炒蛋，包含新鲜的蔬菜和鸡蛋，适合忙碌的早晨或午餐。",
+  "ingredients": [
+    "2个鸡蛋",
+    "1杯切碎的混合蔬菜（胡萝卜、甜椒、洋葱）",
+    "1汤匙橄榄油",
+    "盐和胡椒适量"
+  ],
   "steps": [
     {
+      "index": 1,
       "offset": 0,
-      "title": "1. Slice Ingredients",
-      "description": "• Slice 3 large ripe tomatoes into even rounds. \n• Slice 200g of fresh mozzarella cheese into even rounds. \n• Wash and dry a handful of fresh basil leaves."
+      "title": "准备食材",
+      "description": "打开鸡蛋，将蔬菜切碎备用。"
     },
     {
+      "index": 2,
       "offset": 5,
-      "title": "2. Assemble Salad",
-      "description": "• Layer the tomato and mozzarella slices alternately on a platter. \n• Add a basil leaf between each layer. \n• Drizzle with 2 tablespoons of olive oil and balsamic glaze. \n• Sprinkle with salt and pepper to taste."
+      "title": "炒蔬菜",
+      "description": "在锅中加热橄榄油，加入蔬菜翻炒至半熟。"
+    },
+    {
+      "index": 3,
+      "offset": 8,
+      "title": "加入鸡蛋",
+      "description": "将打好的鸡蛋倒入锅中，轻轻搅拌，直至鸡蛋完全凝固。"
+    },
+    {
+      "index": 4,
+      "offset": 10,
+      "title": "调味上桌",
+      "description": "加入适量的盐和胡椒调味，炒匀后即可出锅，享受美味的蔬菜炒蛋。"
     }
   ]
 }

@@ -8,7 +8,7 @@ import com.belogrudovw.cookingbot.domain.screen.Screen;
 import com.belogrudovw.cookingbot.service.ChatService;
 import com.belogrudovw.cookingbot.service.OrderService;
 import com.belogrudovw.cookingbot.service.ResponseService;
-import com.belogrudovw.cookingbot.telegram.domain.UserAction;
+import com.belogrudovw.cookingbot.domain.telegram.UserAction;
 
 import java.util.Set;
 
@@ -46,7 +46,7 @@ public class SetupLightnessCallbackHandler extends AbstractCallbackHandler {
                     SETUP_LIGHTNESS_MODERATE,
                     SETUP_LIGHTNESS_HEAVY,
                     SETUP_LIGHTNESS_ANY -> {
-                chat.getProperty().setLightness(Lightness.from(button.getText()));
+                chat.getRequestProperties().setLightness(Lightness.from(button.getText()));
                 chatService.save(chat);
                 yield orderService.nextScreen(CURRENT_SCREEN);
             }

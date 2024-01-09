@@ -8,9 +8,9 @@ import lombok.Getter;
 @Getter
 public enum SpinPickRecipeButtons implements CallbackButton {
 
-    SPIN_PICK_RECIPE_START("Start timer"),
-    SPIN_PICK_RECIPE_SPIN("Spin the recipe"),
-    SPIN_PICK_RECIPE_BACK(Navigational.BACK);
+    SPIN_PICK_RECIPE_BACK(Navigational.BACK),
+    SPIN_PICK_RECIPE_SPIN("🔄"),
+    SPIN_PICK_RECIPE_START("▶️");
 
     private final String text;
 

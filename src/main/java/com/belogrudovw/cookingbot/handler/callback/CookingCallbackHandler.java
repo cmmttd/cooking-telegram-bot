@@ -6,20 +6,21 @@ import com.belogrudovw.cookingbot.domain.buttons.CookingButtons;
 import com.belogrudovw.cookingbot.domain.screen.CustomScreen;
 import com.belogrudovw.cookingbot.domain.screen.DefaultScreens;
 import com.belogrudovw.cookingbot.domain.screen.Screen;
+import com.belogrudovw.cookingbot.domain.telegram.UserAction;
 import com.belogrudovw.cookingbot.error.IllegalChatStateException;
 import com.belogrudovw.cookingbot.service.ChatService;
 import com.belogrudovw.cookingbot.service.CookingScheduleService;
 import com.belogrudovw.cookingbot.service.OrderService;
 import com.belogrudovw.cookingbot.service.ResponseService;
-import com.belogrudovw.cookingbot.telegram.domain.UserAction;
 
+import java.time.Duration;
 import java.util.Set;
-import java.util.UUID;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
 
 @Slf4j
 @Component
@@ -35,9 +36,9 @@ public class CookingCallbackHandler extends AbstractCallbackHandler {
     public CookingCallbackHandler(ResponseService responseService, ChatService chatService, OrderService orderService,
                                   CookingScheduleService cookingScheduleService) {
         super(responseService, chatService);
-        this.chatService = chatService;
         this.orderService = orderService;
         this.cookingScheduleService = cookingScheduleService;
+        this.chatService = chatService;
     }
 
     @Override
@@ -48,36 +49,45 @@ public class CookingCallbackHandler extends AbstractCallbackHandler {
     @Override
     public void handleCallback(Chat chat, UserAction.CallbackQuery callbackQuery) {
         long chatId = chat.getId();
-        if (chat.getCurrentRecipe() == null) {
+        Recipe currentRecipe = chat.getCurrentRecipe();
+        if (currentRecipe == null) {
             throw new IllegalChatStateException(chatId, "Recipe must be not null on the step: " + CURRENT_SCREEN);
         }
         var button = CookingButtons.valueOf(callbackQuery.data());
         switch (button) {
             case COOKING_NEXT -> {
-                chatService.nextRecipeStep(chat)
-                        .map(this::buildCustomScreenForRecipeStep)
-                        .ifPresent(screen -> respond(chatId, screen));
-                if (chat.getCurrentRecipe().getSteps().size() == chat.getCookingProgress()) {
-                    respondWithSuccessMessage(chatId, chat.getCurrentRecipe().getId());
-                }
-                cookingScheduleService.scheduleNexStep(chat);
+                Mono.fromRunnable(() -> respondNextStep(chat, chatId))
+                        .then(Mono.fromRunnable(() -> cookingScheduleService.scheduleNexStep(chat)))
+                        .then(Mono.fromRunnable(() -> congratulateIfCompleted(chat, currentRecipe, chatId))
+                                .delaySubscription(Duration.ofMillis(1000)))
+                        .subscribe();
             }
             case COOKING_CANCEL -> {
                 cookingScheduleService.cancelSchedule(chat);
+                chat.setCurrentRecipe(null);
+                chat.setCookingProgress(0);
                 respond(chatId, orderService.prevScreen(CURRENT_SCREEN));
             }
         }
     }
 
-    private CustomScreen buildCustomScreenForRecipeStep(Recipe.CookingStep step) {
+    private void respondNextStep(Chat chat, long chatId) {
+        chatService.incrementProgressAndGetStep(chat)
+                .map(this::buildCustomScreenForRecipeStep)
+                .ifPresent(screen -> respond(chatId, screen));
+    }
+
+    private void congratulateIfCompleted(Chat chat, Recipe currentRecipe, long chatId) {
+        if (currentRecipe.getSteps().size() == chat.getCookingProgress()) {
+            log.info("User from chat {} complete the recipe {}", chatId, currentRecipe.getId());
+            respond(chat.getId(), DefaultScreens.SUCCESS);
+        }
+    }
+
+    private CustomScreen buildCustomScreenForRecipeStep(Recipe.Step step) {
         return CustomScreen.builder()
                 .buttons(CURRENT_SCREEN.getButtons())
                 .text(step.toString())
                 .build();
-    }
-
-    private void respondWithSuccessMessage(long chatId, UUID recipeId) {
-        log.info("User from chat {} complete the recipe {}", chatId, recipeId);
-        respond(chatId, DefaultScreens.SUCCESS);
     }
 }

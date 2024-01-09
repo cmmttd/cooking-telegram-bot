@@ -5,9 +5,9 @@ import lombok.Getter;
 
 @Getter
 public enum Navigational implements Displayable {
-    CANCEL("Cancel progress"),
-    NEXT("Next step"),
-    BACK("Back");
+    NEXT("⏩"),
+    CANCEL("⏹️"),
+    BACK("↩️");
 
     @JsonValue
     private final String text;

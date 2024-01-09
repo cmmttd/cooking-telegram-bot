@@ -3,20 +3,23 @@ package com.belogrudovw.cookingbot.handler.callback;
 import com.belogrudovw.cookingbot.domain.Chat;
 import com.belogrudovw.cookingbot.domain.GenerationMode;
 import com.belogrudovw.cookingbot.domain.Recipe;
+import com.belogrudovw.cookingbot.domain.RequestProperties;
 import com.belogrudovw.cookingbot.domain.buttons.CallbackButton;
 import com.belogrudovw.cookingbot.domain.buttons.CustomCallbackButton;
 import com.belogrudovw.cookingbot.domain.buttons.HomeButtons;
+import com.belogrudovw.cookingbot.domain.displayable.Navigational;
 import com.belogrudovw.cookingbot.domain.screen.CustomScreen;
 import com.belogrudovw.cookingbot.domain.screen.DefaultScreens;
 import com.belogrudovw.cookingbot.domain.screen.Screen;
+import com.belogrudovw.cookingbot.domain.telegram.UserAction;
 import com.belogrudovw.cookingbot.error.IllegalChatStateException;
 import com.belogrudovw.cookingbot.service.ChatService;
 import com.belogrudovw.cookingbot.service.OrderService;
 import com.belogrudovw.cookingbot.service.RecipeService;
 import com.belogrudovw.cookingbot.service.ResponseService;
-import com.belogrudovw.cookingbot.telegram.domain.UserAction;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -24,6 +27,7 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
 
 @Slf4j
 @Component
@@ -53,21 +57,39 @@ public class HomeCallbackHandler extends AbstractCallbackHandler {
     @Override
     public void handleCallback(Chat chat, UserAction.CallbackQuery callbackQuery) {
         long chatId = chat.getId();
-        if (chat.getProperty().isEmpty()) {
+        RequestProperties requestProperties = chat.getRequestProperties();
+        if (requestProperties.isEmpty()) {
             String errorMessage = "Must have a non empty properties for step: %s. But properties there are: %s"
-                    .formatted(CURRENT_SCREEN, chat.getProperty());
+                    .formatted(CURRENT_SCREEN, requestProperties);
             throw new IllegalChatStateException(chatId, errorMessage);
         }
         var button = HomeButtons.valueOf(callbackQuery.data());
         chat.setPivotScreen(CURRENT_SCREEN);
         chatService.save(chat);
-        Screen screen = switch (button) {
-            case HOME_REQUEST_NEW -> buildNextScreenForRecipe(chat, GenerationMode.NEW, recipeService.requestNew(chat));
-            case HOME_EXISTS -> buildNextScreenForRecipe(chat, GenerationMode.EXISTING, recipeService.getRandom(chat));
-            case HOME_HISTORY -> buildNextScreenForHistory(chat);
-            case HOME_BACK -> orderService.prevScreen(CURRENT_SCREEN);
-        };
-        respond(chatId, callbackQuery.message().messageId(), screen);
+        switch (button) {
+            case HOME_RANDOM -> respondAsync(chat, callbackQuery);
+            case HOME_HISTORY -> respond(chatId, callbackQuery.message().messageId(), buildNextScreenForHistory(chat));
+            case HOME_BACK -> respond(chatId, callbackQuery.message().messageId(), orderService.prevScreen(CURRENT_SCREEN));
+        }
+    }
+
+    private void respondAsync(Chat chat, UserAction.CallbackQuery callbackQuery) {
+        showSpinner(chat, callbackQuery, chat.getRequestProperties())
+                .then(recipeService.getRandom(chat))
+                .map(recipe -> buildNextScreenForRecipe(chat, GenerationMode.EXISTING, recipe))
+                .subscribe(screen -> respond(chat.getId(), callbackQuery.message().messageId(), screen));
+    }
+
+    private Mono<Void> showSpinner(Chat chat, UserAction.CallbackQuery callbackQuery, RequestProperties requestProperties) {
+        String spinnerString = "Beautiful wait spinner on the way...%nPlease wait until generation finishes: %s %s %s %s"
+                .formatted(
+                        requestProperties.getLanguage().getText(),
+                        requestProperties.getLightness().getText(),
+                        requestProperties.getDifficulty().getText(),
+                        requestProperties.getUnits().getText()
+                );
+        CustomScreen spinner = CustomScreen.builder().text(spinnerString).buttons(Collections.emptyList()).build();
+        return Mono.fromRunnable(() -> respond(chat.getId(), callbackQuery.message().messageId(), spinner));
     }
 
     private CustomScreen buildNextScreenForHistory(Chat chat) {
@@ -75,13 +97,13 @@ public class HomeCallbackHandler extends AbstractCallbackHandler {
         List<CallbackButton> buttons = new ArrayList<>();
         for (Recipe recipe : history) {
             CustomCallbackButton newButton = CustomCallbackButton.builder()
-                    .text(recipe.getTitle() + " - " + recipe.getCookingTime() + " min\n")
+                    .text(recipe.getTitle() + " - " + recipe.getProperties().cookingTime() + "\n")
                     .callbackData(HOME_HISTORY_CALLBACK_BASE + recipe.getId())
                     .build();
             buttons.add(newButton);
         }
         orderService.nextScreen(CURRENT_SCREEN).getButtons().stream()
-                .filter(button -> button.getText().equals("Back"))
+                .filter(button -> button.getText().equals(Navigational.BACK.getText()))
                 .findFirst()
                 .ifPresent(buttons::add);
         return CustomScreen.builder()

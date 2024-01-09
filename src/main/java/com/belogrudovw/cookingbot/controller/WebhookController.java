@@ -1,7 +1,7 @@
 package com.belogrudovw.cookingbot.controller;
 
 import com.belogrudovw.cookingbot.service.TelegramHandlerDispatcher;
-import com.belogrudovw.cookingbot.telegram.domain.UserAction;
+import com.belogrudovw.cookingbot.domain.telegram.UserAction;
 
 import jakarta.validation.Valid;
 

@@ -10,27 +10,27 @@ import java.util.stream.Stream;
 import org.springframework.stereotype.Component;
 
 @Component
-public class InMemoryChatStorage implements Storage<Long, Chat> {
+public class ChatStorageInMemory implements Storage<Long, Chat> {
 
-    private static final Map<Long, Chat> CACHE = new ConcurrentHashMap<>();
+    private final Map<Long, Chat> chats = new ConcurrentHashMap<>();
 
     @Override
     public void save(Chat chat) {
-        CACHE.put(chat.getId(), chat);
+        chats.put(chat.getId(), chat);
     }
 
     @Override
     public Optional<Chat> get(Long id) {
-        return Optional.ofNullable(CACHE.get(id));
+        return Optional.ofNullable(chats.get(id));
     }
 
     @Override
     public boolean contains(Long id) {
-        return CACHE.containsKey(id);
+        return chats.containsKey(id);
     }
 
     @Override
     public Stream<Chat> all() {
-        return CACHE.values().stream();
+        return chats.values().stream();
     }
 }

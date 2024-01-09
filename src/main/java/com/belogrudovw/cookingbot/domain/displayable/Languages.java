@@ -2,19 +2,23 @@ package com.belogrudovw.cookingbot.domain.displayable;
 
 import java.util.Arrays;
 
-import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Getter;
 
 @Getter
 public enum Languages implements Displayable {
-    DE("Deutsch", "🇩🇪"),
-    FR("French", "🇫🇷"),
-    CH("Chinese", "🇨🇳"),
-    RU("Russian", "🇷🇺"),
-    UA("Ukrainian", "🇺🇦"),
+    DE("Deutsch", " 🇩🇪 "),
+    FR("French", " 🇫🇷 "),
+    CH("Chinese", " 🇨🇳 "),
+    IT("Italian", " 🇮🇹 "),
+    SP("Spanish", " 🇪🇸 "),
+    LV("Lithuanian", " 🇱🇹 "),
+    RU("Russian", " 🇷🇺  "),
+    RS("Serbian", " 🇷🇸 "),
+    UA("Ukrainian", " 🇺🇦 "),
+    JP("Japan", " 🇯🇵 "),
     EN("English", "🇬🇧/🇺🇸");
 
-    @JsonValue
     private final String text;
     private final String icon;
 
@@ -23,9 +27,10 @@ public enum Languages implements Displayable {
         this.icon = icon;
     }
 
+    @JsonCreator
     public static Languages from(String string) {
         return Arrays.stream(values())
-                .filter(value -> value.getText().equals(string) || value.getIcon().equals(string))
+                .filter(value -> value.getText().equalsIgnoreCase(string) || value.getIcon().equals(string))
                 .findFirst()
                 .orElse(EN);
     }

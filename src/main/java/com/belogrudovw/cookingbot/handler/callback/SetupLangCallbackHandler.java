@@ -8,7 +8,7 @@ import com.belogrudovw.cookingbot.domain.screen.Screen;
 import com.belogrudovw.cookingbot.service.ChatService;
 import com.belogrudovw.cookingbot.service.OrderService;
 import com.belogrudovw.cookingbot.service.ResponseService;
-import com.belogrudovw.cookingbot.telegram.domain.UserAction;
+import com.belogrudovw.cookingbot.domain.telegram.UserAction;
 
 import java.util.Set;
 
@@ -41,7 +41,7 @@ public class SetupLangCallbackHandler extends AbstractCallbackHandler {
     @Override
     public void handleCallback(Chat chat, UserAction.CallbackQuery callbackQuery) {
         LanguageButtons lang = LanguageButtons.valueOf(callbackQuery.data());
-        chat.getProperty().setLanguage(Languages.from(lang.getText()));
+        chat.getRequestProperties().setLanguage(Languages.from(lang.getText()));
         chatService.save(chat);
         Screen screen = orderService.nextScreen(CURRENT_SCREEN);
         respond(chat.getId(), callbackQuery.message().messageId(), screen);

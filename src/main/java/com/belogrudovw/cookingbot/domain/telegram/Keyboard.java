@@ -1,4 +1,4 @@
-package com.belogrudovw.cookingbot.telegram.domain;
+package com.belogrudovw.cookingbot.domain.telegram;
 
 import java.util.List;
 import java.util.stream.Collectors;

@@ -1,28 +1,39 @@
 {
-  "property": {
-    "language": "English",
+  "language": "English",
+  "properties": {
     "lightness": "Light",
     "units": "METRIC",
-    "difficulty": "15 minutes"
+    "cooking_time": 15
   },
-  "title": "Avocado and Chickpea Salad",
-  "short_description": "This Avocado and Chickpea Salad is a refreshing and nutritious choice, perfect for a light meal. It combines creamy avocado, protein-rich chickpeas, and a zesty lemon dressing. \n• 1 ripe avocado \n• 400g canned chickpeas, drained and rinsed \n• 1 small red onion, finely chopped \n• A handful of cherry tomatoes, halved \n• Juice of 1 lemon \n• 2 tablespoons olive oil \n• Salt and pepper to taste \n• Fresh parsley, chopped",
-  "cooking_time": 10,
+  "title": "Fresh Tomato & Basil Pasta",
+  "short_description": "Enjoy a light and refreshing tomato and basil pasta, perfect for a quick and healthy meal in under 15 minutes.",
+  "ingredients": [
+    "200g spaghetti",
+    "2 ripe tomatoes, chopped",
+    "1 clove garlic, minced",
+    "A handful of fresh basil leaves",
+    "2 tbsp olive oil",
+    "Salt and pepper to taste",
+    "Grated Parmesan cheese (optional)"
+  ],
   "steps": [
     {
+      "index": 1,
       "offset": 0,
-      "title": "1. Prepare Ingredients",
-      "description": "Dice 1 ripe avocado and place in a large bowl. Add 400g drained and rinsed chickpeas, 1 finely chopped small red onion, and a handful of halved cherry tomatoes."
+      "title": "Cook Pasta",
+      "description": "Cook the spaghetti according to package instructions until al dente. Drain and set aside."
     },
     {
+      "index": 2,
       "offset": 5,
-      "title": "2. Make Dressing",
-      "description": "In a small bowl, whisk together the juice of 1 lemon, 2 tablespoons of olive oil, and salt and pepper to taste."
+      "title": "Prepare Sauce",
+      "description": "While pasta cooks, in a large bowl, combine chopped tomatoes, minced garlic, basil leaves, olive oil, salt, and pepper."
     },
     {
+      "index": 3,
       "offset": 10,
-      "title": "3. Combine and Serve",
-      "description": "Pour the dressing over the salad and toss gently to combine. Garnish with chopped fresh parsley before serving."
+      "title": "Combine and Serve",
+      "description": "Toss the cooked spaghetti with the tomato mixture. Serve warm or at room temperature, topped with grated Parmesan if desired."
     }
   ]
 }

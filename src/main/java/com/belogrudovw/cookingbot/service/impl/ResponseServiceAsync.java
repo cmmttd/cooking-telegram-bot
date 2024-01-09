@@ -1,7 +1,7 @@
 package com.belogrudovw.cookingbot.service.impl;
 
+import com.belogrudovw.cookingbot.domain.telegram.Keyboard;
 import com.belogrudovw.cookingbot.service.ResponseService;
-import com.belogrudovw.cookingbot.telegram.domain.Keyboard;
 import com.belogrudovw.cookingbot.util.CustomUriBuilder;
 
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,7 @@ import static com.belogrudovw.cookingbot.util.StringUtil.escapeCharacters;
 @RequiredArgsConstructor
 public class ResponseServiceAsync implements ResponseService {
 
-    private final WebClient client;
+    private final WebClient telegramWebClient;
 
     @Override
     public void sendMessage(long chatId, String text, Keyboard keyboard) {
@@ -27,7 +27,7 @@ public class ResponseServiceAsync implements ResponseService {
                 .queryParam("parse_mode", "MarkdownV2")
                 .queryParam("reply_markup", keyboard.toString())
                 .build();
-        client.post()
+        telegramWebClient.post()
                 .uri(uri)
                 .exchangeToMono(resp -> resp.bodyToMono(String.class))
                 .subscribe(s -> log.debug(">> Response: {}", s));
@@ -43,7 +43,7 @@ public class ResponseServiceAsync implements ResponseService {
                 .queryParam("parse_mode", "MarkdownV2")
                 .queryParam("reply_markup", keyboard.toString())
                 .build();
-        client.post()
+        telegramWebClient.post()
                 .uri(uri)
                 .exchangeToMono(resp -> resp.bodyToMono(String.class))
                 .subscribe(s -> log.debug(">> Response: {}", s));
