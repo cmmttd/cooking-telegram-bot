@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
+import reactor.util.retry.RetryBackoffSpec;
 
 @Slf4j
 @Service
@@ -36,20 +37,21 @@ public class OpenAiClient implements RecipeSupplier {
               "messages": [
                 {
                   "role": "system",
-                  "content": "You are cooking assistant. Your aim to provide to users usable, interesting and uniq recipes by requested parameters"
+                  "content": "You are cooking assistant. Your aim to provide to users usable, interesting and uniq recipes by requested parameters. Response must be only one valid json object and precisely follow the pattern: {\\"language\\":%s Language from the recipes request,\\"properties\\":{\\"lightness\\":%s(same as request - Light or Moderate or Heavy),\\"units\\":%s (same as request - METRIC or IMPERIAL),\\"cooking_time\\":%d general time of cooking process in minutes for the recipe},\\"title\\":%s,\\"short_description\\":%s 100-500 symbols,\\"ingredients\\":[%s],\\"steps\\":[{\\"index\\":%d sequential number from one,\\"offset\\":%d in minutes related to the first step (from 0 to end cooking time),\\"title\\":%s step title,\\"description\\":%s what should be done}]}"
                 },
                 {
                   "role": "user",
-                  "content": "Recipe must to fit to each parameter precisely, please pay a lot attention to follow them - whole recipe language (except properties) must be ${language}, relative lightness of the recipe by energy value - ${lightness}, measurement units - ${units}, cooking time less than ${difficulty} minutes. Response must be only one valid json object and precisely follow the pattern: {\\"language\\":%s Language from the recipes request,\\"properties\\":{\\"lightness\\":%s(same as request - Light or Moderate or Heavy),\\"units\\":%s (same as request - METRIC or IMPERIAL),\\"cooking_time\\":%d general time of cooking process in minutes for the recipe},\\"title\\":%s,\\"short_description\\":%s 100-500 symbols,\\"ingredients\\":[%s],\\"steps\\":[{\\"index\\":%d sequential number from one,\\"offset\\":%d in minutes related to the first step (from 0 to end cooking time),\\"title\\":%s step title,\\"description\\":%s what should be done}]}"
+                  "content": "One more recipe please by parameters: whole recipe language (except properties) must be ${language}, relative lightness of the recipe by energy value - ${lightness}, measurement units - ${units}, cooking time less than ${difficulty} minutes. Recipe must to fit to each parameter precisely, please pay a lot attention to follow them"
                 }
               ],
-              "temperature": 1,
+              "temperature": 1.25,
               "max_tokens": 4000,
               "top_p": 1,
               "frequency_penalty": 0,
               "presence_penalty": 0
             }
             """;
+    private static final int MAX_ATTEMPTS = 3;
 
     WebClient openAiWebClient;
     OpenAiProperties properties;
@@ -71,47 +73,58 @@ public class OpenAiClient implements RecipeSupplier {
                 .exchangeToMono(resp -> resp.bodyToMono(OpenApiResponse.class))
                 .doOnSuccess(response -> log.debug("<<< Succeed openai response: {}", response))
                 .doOnError(err -> {
+                    // TODO: 11/01/2024 Add more specific request if error
                     log.error("Recipe request failed", err);
                     throw new RuntimeException(err);
                 })
-                .map(resp -> {
-                    String content = resp.choices().get(0).message().content();
-                    int beginIndex = content.indexOf("{");
-                    if (beginIndex != 0) {
-                        log.info("<<<< Invalid json: {}", content.split("\\{")[0].replaceAll("\\n", ""));
-                    }
-                    content = content.substring(beginIndex)
-                            .replaceAll("```json", "")
-                            .replaceAll("```", "");
-                    try {
-                        Recipe recipe = objectMapper.readValue(content, Recipe.class);
-                        return recipe;
-                    } catch (JsonProcessingException e) {
-                        log.error("Parsing error during the openai request", e);
-                        throw new RuntimeException(e);
-//                        return getStubRecipe();
-                    }
-                })
-                .map(recipe -> {
-                    boolean isAbsent = recipeStorage.all()
-                            .parallel()
-                            .map(Recipe::getTitle)
-                            .filter(current -> current.equalsIgnoreCase(recipe.getTitle()))
-                            .findAny()
-                            .isEmpty();
-                    if (isAbsent) {
-                        recipeStorage.save(recipe);
-                        log.info("New recipe has been generated: {}", recipe.getTitle());
-                        return recipe;
-                    } else {
-                        log.error("Recipe exists: {}", recipe.getTitle());
-                        throw new RuntimeException();
-                    }
-                })
-                .retryWhen(Retry.backoff(3, Duration.ofSeconds(5))
-                        .jitter(0d)
-                        .doAfterRetry(retrySignal -> log.info("Retried " + retrySignal.totalRetries()))
-                        .onRetryExhaustedThrow((retryBackoffSpec, retrySignal) -> new IllegalArgumentException()));
+                .map(this::parseRecipe)
+                .map(this::duplicatesCheck)
+                .timeout(Duration.ofMinutes(5))
+                .retryWhen(setupRetry())
+                .doOnError(err -> log.error("Reties weren't complete by {} attempts", MAX_ATTEMPTS, err))
+                .onErrorReturn(getStubRecipe());
+    }
+
+    private Recipe parseRecipe(OpenApiResponse resp) {
+        String content = resp.choices().get(0).message().content();
+        int beginIndex = content.indexOf("{");
+        if (beginIndex != 0) {
+            log.warn("<<<< Invalid json: {}", content.split("\\{")[0].replaceAll("\\n", ""));
+        }
+        content = content.substring(beginIndex)
+                .replaceAll("```json", "")
+                .replaceAll("```", "");
+        try {
+            Recipe recipe = objectMapper.readValue(content, Recipe.class);
+            return recipe;
+        } catch (JsonProcessingException e) {
+            log.error("Parsing error during the openai request", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Recipe duplicatesCheck(Recipe recipe) {
+        boolean isAbsent = recipeStorage.all()
+                .parallel()
+                .map(Recipe::getTitle)
+                .filter(current -> current.equalsIgnoreCase(recipe.getTitle()))
+                .findAny()
+                .isEmpty();
+        if (isAbsent) {
+            recipeStorage.save(recipe);
+            log.info("New recipe has been generated and saved: {}", recipe.getTitle());
+            return recipe;
+        } else {
+            log.error("Recipe already exists: {}", recipe.getTitle());
+            throw new RuntimeException();
+        }
+    }
+
+    private static RetryBackoffSpec setupRetry() {
+        return Retry.backoff(MAX_ATTEMPTS, Duration.ofSeconds(2))
+                .jitter(0d)
+                .doAfterRetry(retrySignal -> log.info("Retried {}", retrySignal.totalRetries() + 1))
+                .onRetryExhaustedThrow((retryBackoffSpec, retrySignal) -> new IllegalArgumentException());
     }
 
     record OpenApiResponse(List<Choice> choices) {

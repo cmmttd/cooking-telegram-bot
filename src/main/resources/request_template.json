@@ -1,23 +1,18 @@
 {
-  "property": {
-    "language": "Language of th recipe from the recipe's request",
-    "lightness": "Lightness of desired dish from the recipe's request",
-    "units": "Measurement units from the recipe's request",
-    "difficulty": "Difficulty of cooking process from the recipe's request"
-  },
-  "title": "Few words title",
-  "short_description": "Short description by 200-300 symbols length. With list of ingredients, each other from new line with sign •",
-  "cooking_time": "int value in minutes of general actual cooking time for the recipe",
-  "steps": [
+  "model": "${model}",
+  "messages": [
     {
-      "offset": "int value in minutes related to first step (from 0 to end cooking time)",
-      "title": "int number of the step and name of the step",
-      "description": "What should be done"
+      "role": "system",
+      "content": "You are cooking assistant. Your aim to provide to users usable, interesting and uniq recipes by requested parameters. Response must be only one valid json object and precisely follow the pattern: {\"language\":%s Language from the recipes request,\"properties\":{\"lightness\":%s(same as request - Light or Moderate or Heavy),\"units\":%s (same as request - METRIC or IMPERIAL),\"cooking_time\":%d general time of cooking process in minutes for the recipe},\"title\":%s,\"short_description\":%s 100-500 symbols,\"ingredients\":[%s],\"steps\":[{\"index\":%d sequential number from one,\"offset\":%d in minutes related to the first step (from 0 to end cooking time),\"title\":%s step title,\"description\":%s what should be done}]}"
     },
     {
-      "offset": "int value in minutes related to first step (from 0 to end cooking time)",
-      "title": "int number of the step and name of the step",
-      "description": "What should be done"
+      "role": "user",
+      "content": "One more recipe please by parameters: whole recipe language (except properties) must be ${language}, relative lightness of the recipe by energy value - ${lightness}, measurement units - ${units}, cooking time less than ${difficulty} minutes. Recipe must to fit to each parameter precisely, please pay a lot attention to follow them"
     }
-  ]
+  ],
+  "temperature": 1,
+  "max_tokens": 4000,
+  "top_p": 1,
+  "frequency_penalty": 0,
+  "presence_penalty": 0
 }

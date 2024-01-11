@@ -2,6 +2,7 @@ package com.belogrudovw.cookingbot.handler.callback;
 
 import com.belogrudovw.cookingbot.domain.Chat;
 import com.belogrudovw.cookingbot.domain.screen.Screen;
+import com.belogrudovw.cookingbot.error.IllegalChatStateException;
 import com.belogrudovw.cookingbot.service.ChatService;
 import com.belogrudovw.cookingbot.service.ResponseService;
 import com.belogrudovw.cookingbot.domain.telegram.Keyboard;
@@ -24,9 +25,11 @@ public abstract class AbstractCallbackHandler implements CallbackHandler {
 
     @Override
     public void handle(UserAction action) {
-        log.info("{} called for action: {}", this.getClass().getSimpleName(), action.toString().replaceAll("\n", " "));
+        UserAction.CallbackQuery callbackQuery = action.callbackQuery()
+                .orElseThrow(() -> new IllegalChatStateException(action.getChatId(), "Callback data required for callback handlers"));
+        String userIdentification = action.getChatId() + " - " + action.getUserName();
+        log.info("Route {} to {} for user: {}", callbackQuery.data(), this.getClass().getSimpleName(), userIdentification);
         Chat chat = chatService.findById(action.getChatId());
-        UserAction.CallbackQuery callbackQuery = action.callbackQuery().orElseThrow();
         handleCallback(chat, callbackQuery);
     }
 

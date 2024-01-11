@@ -62,6 +62,7 @@ public class CookingCallbackHandler extends AbstractCallbackHandler {
                                 .delaySubscription(Duration.ofMillis(1000)))
                         .subscribe();
             }
+            case COOKING_PAUSE -> cookingScheduleService.cancelSchedule(chat);
             case COOKING_CANCEL -> {
                 cookingScheduleService.cancelSchedule(chat);
                 chat.setCurrentRecipe(null);
