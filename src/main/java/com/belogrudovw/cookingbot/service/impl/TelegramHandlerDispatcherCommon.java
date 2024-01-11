@@ -1,12 +1,12 @@
 package com.belogrudovw.cookingbot.service.impl;
 
+import com.belogrudovw.cookingbot.domain.telegram.UserAction;
 import com.belogrudovw.cookingbot.handler.Handler;
 import com.belogrudovw.cookingbot.handler.callback.CallbackHandler;
 import com.belogrudovw.cookingbot.handler.callback.DynamicCallbackHandler;
 import com.belogrudovw.cookingbot.handler.message.MessageHandler;
 import com.belogrudovw.cookingbot.service.ChatService;
 import com.belogrudovw.cookingbot.service.TelegramHandlerDispatcher;
-import com.belogrudovw.cookingbot.domain.telegram.UserAction;
 
 import java.util.Map;
 import java.util.Optional;
@@ -45,6 +45,9 @@ public class TelegramHandlerDispatcherCommon implements TelegramHandlerDispatche
 
     @Override
     public void dispatch(UserAction action) {
+        String flattenedActionString = action.toString().replaceAll("\n", " ");
+        log.debug("Action received: {}", flattenedActionString);
+        // TODO: 10/01/2024 wrap all handling by try catch and rethrow exception with user action
         Optional.<Handler>empty()
                 .or(() -> findMessageHandler(action))
                 .or(() -> findCallbackQueryHandler(action))

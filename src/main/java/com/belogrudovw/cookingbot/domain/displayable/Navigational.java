@@ -7,6 +7,7 @@ import lombok.Getter;
 public enum Navigational implements Displayable {
     NEXT("⏩"),
     CANCEL("⏹️"),
+    PAUSE("⏸️"),
     BACK("↩️");
 
     @JsonValue

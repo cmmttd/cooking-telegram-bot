@@ -18,6 +18,7 @@ import com.belogrudovw.cookingbot.service.OrderService;
 import com.belogrudovw.cookingbot.service.RecipeService;
 import com.belogrudovw.cookingbot.service.ResponseService;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -75,7 +76,8 @@ public class HomeCallbackHandler extends AbstractCallbackHandler {
 
     private void respondAsync(Chat chat, UserAction.CallbackQuery callbackQuery) {
         showSpinner(chat, callbackQuery, chat.getRequestProperties())
-                .then(recipeService.getRandom(chat))
+                .then(recipeService.getRandom(chat)
+                        .delaySubscription(Duration.ofMillis(500)))
                 .map(recipe -> buildNextScreenForRecipe(chat, GenerationMode.EXISTING, recipe))
                 .subscribe(screen -> respond(chat.getId(), callbackQuery.message().messageId(), screen));
     }

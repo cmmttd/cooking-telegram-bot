@@ -64,7 +64,8 @@ public class RecipeServiceImpl implements RecipeService {
                 .filter(recipe -> chat.getRequestProperties().matchesTo(recipe.getProperties()))
                 .findFirst()
                 .map(Mono::just)
-                .orElseGet(() -> requestNew(chat));
+                .orElseGet(() -> requestNew(chat))
+                .doOnSuccess(recipe -> log.info("Random recipe: {}", recipe.getTitle()));
     }
 
     @Override
