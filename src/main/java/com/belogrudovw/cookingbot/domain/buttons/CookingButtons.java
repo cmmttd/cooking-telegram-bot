@@ -9,6 +9,7 @@ import lombok.Getter;
 public enum CookingButtons implements CallbackButton {
 
     COOKING_CANCEL(Navigational.CANCEL),
+    COOKING_PAUSE(Navigational.PAUSE),
     COOKING_NEXT(Navigational.NEXT);
 
     private final String text;

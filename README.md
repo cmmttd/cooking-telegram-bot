@@ -26,6 +26,7 @@ Just open the bot, click "Start сooking" and just follow to notifications.
 * [create](https://core.telegram.org/bots/features#creating-a-new-bot) the telegram bot;
 * set COOKING_BOT_TOKEN and COOKING_BOT_NAME to environment variables;
 * obtain own public and secured https url and set it to WEBHOOK_URL also (eg ngrok http 8083);
+* set OPENAI_TOKEN;
 
 ### Locally by maven
 

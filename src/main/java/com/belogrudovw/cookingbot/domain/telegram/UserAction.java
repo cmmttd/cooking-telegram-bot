@@ -1,6 +1,8 @@
 package com.belogrudovw.cookingbot.domain.telegram;
 
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import jakarta.validation.constraints.NotNull;
 
 public record UserAction(@NotNull Integer updateId, Optional<Message> message, Optional<CallbackQuery> callbackQuery) {
@@ -11,6 +13,19 @@ public record UserAction(@NotNull Integer updateId, Optional<Message> message, O
                         .map(CallbackQuery::message))
                 .map(Message::chat)
                 .map(TelegramChat::id)
+                .orElseThrow();
+    }
+
+    public String getUserName() {
+        return message()
+                .or(() -> callbackQuery()
+                        .map(CallbackQuery::message))
+                .map(Message::chat)
+                .map(chat -> Stream.of(chat.firstName(), chat.lastName(), chat.username())
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .filter(x -> !x.isBlank())
+                        .collect(Collectors.joining(" ")))
                 .orElseThrow();
     }
 
