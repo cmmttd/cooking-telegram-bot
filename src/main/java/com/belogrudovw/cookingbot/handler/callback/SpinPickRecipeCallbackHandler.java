@@ -3,7 +3,6 @@ package com.belogrudovw.cookingbot.handler.callback;
 import com.belogrudovw.cookingbot.domain.Chat;
 import com.belogrudovw.cookingbot.domain.GenerationMode;
 import com.belogrudovw.cookingbot.domain.Recipe;
-import com.belogrudovw.cookingbot.domain.RequestProperties;
 import com.belogrudovw.cookingbot.domain.buttons.SpinPickRecipeButtons;
 import com.belogrudovw.cookingbot.domain.screen.CustomScreen;
 import com.belogrudovw.cookingbot.domain.screen.DefaultScreens;
@@ -16,6 +15,7 @@ import com.belogrudovw.cookingbot.service.OrderService;
 import com.belogrudovw.cookingbot.service.RecipeService;
 import com.belogrudovw.cookingbot.service.ResponseService;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.Set;
 
@@ -77,22 +77,14 @@ public class SpinPickRecipeCallbackHandler extends AbstractCallbackHandler {
     }
 
     private void respondNewRecipe(Chat chat, UserAction.CallbackQuery callbackQuery) {
-        RequestProperties requestProperties = chat.getRequestProperties();
-        String spinnerString = "Beautiful wait spinner on the way...%nPlease wait until generation finishes: %s %s %s %s"
-                .formatted(
-                        requestProperties.getLanguage().getText(),
-                        requestProperties.getLightness().getText(),
-                        requestProperties.getDifficulty().getText(),
-                        requestProperties.getUnits().getText()
-                );
-        CustomScreen spinner = CustomScreen.builder().text(spinnerString).buttons(Collections.emptyList()).build();
-        Mono<Void> responseTrain = Mono.fromRunnable(() -> respond(chat.getId(), callbackQuery.message().messageId(), spinner));
+        Mono<Void> showSpinner = showSpinner(chat, callbackQuery, chat.getRequestProperties());
 
         Mono<Recipe> monoRecipe = chat.getMode() == GenerationMode.NEW
                 ? recipeService.requestNew(chat)
                 : recipeService.getRandom(chat);
-        responseTrain
-                .then(monoRecipe)
+        showSpinner
+                .then(monoRecipe
+                        .delaySubscription(Duration.ofMillis(300)))
                 .map(recipe -> {
                     chatService.setNewRecipe(chat, recipe);
                     return recipe;

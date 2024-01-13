@@ -19,16 +19,14 @@ import com.belogrudovw.cookingbot.service.RecipeService;
 import com.belogrudovw.cookingbot.service.ResponseService;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Mono;
 
 @Slf4j
 @Component
@@ -82,28 +80,14 @@ public class HomeCallbackHandler extends AbstractCallbackHandler {
                 .subscribe(screen -> respond(chat.getId(), callbackQuery.message().messageId(), screen));
     }
 
-    private Mono<Void> showSpinner(Chat chat, UserAction.CallbackQuery callbackQuery, RequestProperties requestProperties) {
-        String spinnerString = "Beautiful wait spinner on the way...%nPlease wait until generation finishes: %s %s %s %s"
-                .formatted(
-                        requestProperties.getLanguage().getText(),
-                        requestProperties.getLightness().getText(),
-                        requestProperties.getDifficulty().getText(),
-                        requestProperties.getUnits().getText()
-                );
-        CustomScreen spinner = CustomScreen.builder().text(spinnerString).buttons(Collections.emptyList()).build();
-        return Mono.fromRunnable(() -> respond(chat.getId(), callbackQuery.message().messageId(), spinner));
-    }
-
     private CustomScreen buildNextScreenForHistory(Chat chat) {
-        List<Recipe> history = chat.getHistory().reversed();
-        List<CallbackButton> buttons = new ArrayList<>();
-        for (Recipe recipe : history) {
-            CustomCallbackButton newButton = CustomCallbackButton.builder()
-                    .text(recipe.getTitle() + " - " + recipe.getProperties().cookingTime() + "\n")
-                    .callbackData(HOME_HISTORY_CALLBACK_BASE + recipe.getId())
-                    .build();
-            buttons.add(newButton);
-        }
+        List<CallbackButton> buttons = chat.getHistory().reversed().stream()
+                .map(recipe -> CustomCallbackButton.builder()
+                        .text(recipe.getTitle() + " - " + recipe.getProperties().cookingTime() + "\n")
+                        .callbackData(HOME_HISTORY_CALLBACK_BASE + recipe.getId())
+                        .build())
+                .limit(42)
+                .collect(Collectors.toList());
         orderService.nextScreen(CURRENT_SCREEN).getButtons().stream()
                 .filter(button -> button.getText().equals(Navigational.BACK.getText()))
                 .findFirst()

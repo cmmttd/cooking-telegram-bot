@@ -1,14 +1,24 @@
 {
-  
-  "language": "English",
+  "id": "7e9907da-340f-4664-9f9a-3be996f625a0",
+  "title": "Quick and Easy Salad",
   "properties": {
     "lightness": "Light",
     "units": "METRIC",
     "cooking_time": 15
   },
-  "title": "Quick and Easy Salad",
   "short_description": "This quick and easy salad is perfect for a light and healthy meal. Packed with fresh vegetables and a zesty dressing, it's a delicious way to stay energized throughout the day.",
-  "ingredients": ["Mixed salad greens", "Cherry tomatoes", "Cucumber", "Red onion", "Feta cheese", "Olives", "Olive oil", "Lemon juice", "Salt", "Pepper"],
+  "ingredients": [
+    "Mixed salad greens",
+    "Cherry tomatoes",
+    "Cucumber",
+    "Red onion",
+    "Feta cheese",
+    "Olives",
+    "Olive oil",
+    "Lemon juice",
+    "Salt",
+    "Pepper"
+  ],
   "steps": [
     {
       "index": 1,
@@ -28,5 +38,6 @@
       "title": "Assemble the Salad",
       "description": "Add the feta cheese and olives to the bowl with the prepared vegetables. Drizzle the dressing over the salad and toss gently to combine. Serve immediately and enjoy!"
     }
-  ]
+  ],
+  "language": "EN"
 }
