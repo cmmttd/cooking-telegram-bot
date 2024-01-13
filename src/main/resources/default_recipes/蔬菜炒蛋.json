@@ -1,11 +1,11 @@
 {
-  "language": "Chinese",
+  "id": "f4332ece-523b-4aa3-9e96-120b0670710a",
+  "title": "蔬菜炒蛋",
   "properties": {
     "lightness": "Light",
     "units": "METRIC",
     "cooking_time": 10
   },
-  "title": "蔬菜炒蛋",
   "short_description": "这是一道简单且营养的快速炒蛋，包含新鲜的蔬菜和鸡蛋，适合忙碌的早晨或午餐。",
   "ingredients": [
     "2个鸡蛋",
@@ -38,5 +38,6 @@
       "title": "调味上桌",
       "description": "加入适量的盐和胡椒调味，炒匀后即可出锅，享受美味的蔬菜炒蛋。"
     }
-  ]
+  ],
+  "language": "CH"
 }

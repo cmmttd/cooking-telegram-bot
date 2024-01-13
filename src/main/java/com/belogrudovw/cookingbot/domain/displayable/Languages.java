@@ -30,7 +30,9 @@ public enum Languages implements Displayable {
     @JsonCreator
     public static Languages from(String string) {
         return Arrays.stream(values())
-                .filter(value -> value.getText().equalsIgnoreCase(string) || value.getIcon().equals(string))
+                .filter(value -> value.getText().equalsIgnoreCase(string)
+                        || value.getIcon().equals(string)
+                        || value.name().equalsIgnoreCase(string))
                 .findFirst()
                 .orElse(EN);
     }

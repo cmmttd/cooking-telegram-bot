@@ -5,19 +5,14 @@ import com.belogrudovw.cookingbot.domain.Recipe;
 import com.belogrudovw.cookingbot.service.RecipeService;
 import com.belogrudovw.cookingbot.service.RecipeSupplier;
 import com.belogrudovw.cookingbot.storage.Storage;
+import com.belogrudovw.cookingbot.util.FilesUtil;
+import com.belogrudovw.cookingbot.util.Pair;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Iterator;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Stream;
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -31,27 +26,22 @@ import reactor.core.publisher.Mono;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RecipeServiceImpl implements RecipeService {
 
+    static final String RECIPE_FOLDER_PATH = "src/main/resources/default_recipes/";
+
     Storage<UUID, Recipe> recipeStorage;
     RecipeSupplier recipeSupplier;
 
-    // TODO: 15/12/2023 Remove init
     @PostConstruct
-    void init() {
-        try (Stream<Path> paths = Files.walk(Paths.get("src/main/resources/default_recipes"))) {
-            ObjectMapper om = new ObjectMapper();
-            om.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
-            Iterator<Path> iterator = paths.iterator();
-            while (iterator.hasNext()) {
-                Path path = iterator.next();
-                if (Files.isRegularFile(path)) {
-                    String readString = Files.readString(path);
-                    Recipe recipe = om.readValue(readString, Recipe.class);
-                    recipeStorage.save(recipe);
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    void recover() {
+        FilesUtil.recover(RECIPE_FOLDER_PATH, Recipe.class, recipeStorage::save);
+        log.info("Recipe recover succeed for: {}", recipeStorage.all().count());
+    }
+
+    @PreDestroy
+    void backup() {
+        var recipeStream = recipeStorage.all().map(recipe -> new Pair<>(String.valueOf(recipe.getTitle()), recipe));
+        FilesUtil.backup(RECIPE_FOLDER_PATH, recipeStream);
+        log.info("Recipe data backup succeed for: {}", recipeStorage.all().count());
     }
 
     @Override
