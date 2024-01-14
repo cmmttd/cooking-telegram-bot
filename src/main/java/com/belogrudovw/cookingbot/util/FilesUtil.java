@@ -51,8 +51,9 @@ public final class FilesUtil {
                         Files.createFile(path);
                         String json = objectMapper.writeValueAsString(pair.value());
                         Files.writeString(path, json);
+                        log.info("File saved: {}", fileName + ".json");
                     } catch (FileAlreadyExistsException e) {
-                        log.warn("File already exists: {}", fileName + ".json");
+                        log.debug("File already exists: {}", fileName + ".json");
                     } catch (JsonProcessingException e) {
                         log.error("Json parsing exception: {}", fileName, e);
                     } catch (IOException e) {

@@ -8,6 +8,7 @@ import lombok.Getter;
 @Getter
 public enum HomeButtons implements CallbackButton {
 
+    HOME_CUSTOM("New custom"),
     HOME_RANDOM("New random"),
     HOME_HISTORY("History"),
     HOME_BACK(Navigational.BACK);

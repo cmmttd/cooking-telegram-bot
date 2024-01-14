@@ -8,8 +8,10 @@ import com.belogrudovw.cookingbot.storage.Storage;
 import com.belogrudovw.cookingbot.util.FilesUtil;
 import com.belogrudovw.cookingbot.util.Pair;
 
+import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 
@@ -46,25 +48,36 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     public Mono<Recipe> getRandom(Chat chat) {
-        return recipeStorage.all()
-                .filter(recipe -> chat.getCurrentRecipe() == null || !recipe.equals(chat.getCurrentRecipe()))
+        Stream<Recipe> recipeStream = recipeStorage.all().parallel();
+        if (chat.isAwaitCustomQuery()) {
+            // TODO: 14/01/2024 Add full-body text search by additional request
+            recipeStream = recipeStream.filter(recipe -> {
+                String additionalQuery = chat.getAdditionalQuery().toLowerCase(Locale.ROOT);
+                return recipe.getShortDescription().toLowerCase(Locale.ROOT).contains(additionalQuery)
+                        || recipe.getTitle().toLowerCase(Locale.ROOT).contains(additionalQuery);
+            });
+        }
+        return recipeStream
                 .filter(recipe -> !chat.getHistory().contains(recipe))
+                .filter(recipe -> chat.getCurrentRecipe() == null || !recipe.equals(chat.getCurrentRecipe()))
                 // TODO: 07/01/2024 Issue:#9 Replace lang filtering by requesting required lang from recipe
                 .filter(recipe -> chat.getRequestProperties().getLanguage() == recipe.getLanguage())
                 .filter(recipe -> chat.getRequestProperties().matchesTo(recipe.getProperties()))
                 .findFirst()
                 .map(Mono::just)
                 .orElseGet(() -> requestNew(chat))
-                .doOnSuccess(recipe -> log.info("Random recipe: {}", recipe.getTitle()));
+                .doOnSuccess(recipe -> log.info("Random recipe '{}' for chat {}", recipe.getTitle(), chat.getId()));
+    }
+
+    @Override
+    public Mono<Recipe> requestNew(Chat chat) {
+        String additionalQuery = chat.isAwaitCustomQuery() && chat.getAdditionalQuery() != null ? chat.getAdditionalQuery() : "";
+        log.info("New recipe requested for chat {} {}", chat.getId(), additionalQuery);
+        return recipeSupplier.get(chat.getRequestProperties(), additionalQuery);
     }
 
     @Override
     public Optional<Recipe> findById(UUID id) {
         return recipeStorage.get(id);
-    }
-
-    @Override
-    public Mono<Recipe> requestNew(Chat chat) {
-        return recipeSupplier.get(chat.getRequestProperties());
     }
 }

@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class DynamicCallbackHandlerHistory extends AbstractDynamicCallbackHandler {
+public class PatternCallbackHandlerHistory extends AbstractPatternCallbackHandler {
 
     static final DefaultScreens CURRENT_SCREEN = DefaultScreens.HOME;
     static final String HOME_HISTORY_CALLBACK_BASE = CURRENT_SCREEN.name() + "_";
@@ -32,7 +32,7 @@ public class DynamicCallbackHandlerHistory extends AbstractDynamicCallbackHandle
     RecipeService recipeService;
     OrderService orderService;
 
-    public DynamicCallbackHandlerHistory(ResponseService responseService, ChatService chatService, RecipeService recipeService,
+    public PatternCallbackHandlerHistory(ResponseService responseService, ChatService chatService, RecipeService recipeService,
                                          OrderService orderService) {
         super(responseService, chatService);
         this.chatService = chatService;

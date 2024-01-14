@@ -41,7 +41,7 @@ public class OpenAiClient implements RecipeSupplier {
                 },
                 {
                   "role": "user",
-                  "content": "One more recipe please by parameters: whole recipe language (except properties) must be ${language}, relative lightness of the recipe by energy value - ${lightness}, measurement units - ${units}, cooking time less than ${difficulty} minutes. Recipe must to fit to each parameter precisely, please pay a lot attention to follow them"
+                  "content": "One more recipe please by parameters: whole recipe language (except properties) must be ${language}, relative lightness of the recipe by energy value - ${lightness}, measurement units - ${units}, cooking time less than ${difficulty} minutes.${additional_query} Recipe must to fit to each parameter precisely, please pay a lot attention to follow them"
                 }
               ],
               "temperature": 1.25,
@@ -51,7 +51,8 @@ public class OpenAiClient implements RecipeSupplier {
               "presence_penalty": 0
             }
             """;
-    private static final int MAX_ATTEMPTS = 3;
+    static final int MAX_ATTEMPTS = 3;
+    static final int RESPONSE_TIMEOUT = 10;
 
     WebClient openAiWebClient;
     OpenAiProperties properties;
@@ -59,44 +60,52 @@ public class OpenAiClient implements RecipeSupplier {
     Storage<UUID, Recipe> recipeStorage;
 
     @Override
-    public Mono<Recipe> get(RequestProperties request) throws RuntimeException {
-        OpenAiProperties.Models models = properties.conversation().models();
-        String formatted = REQUEST_PATTERN
-                .replaceAll("\\$\\{model}", Set.of(Languages.CH, Languages.JP, Languages.RU, Languages.FR)
-                        .contains(request.getLanguage()) ? models.wise() : models.cheap())
-                .replaceAll("\\$\\{language}", request.getLanguage().getText())
-                .replaceAll("\\$\\{lightness}", request.getLightness().getText())
-                .replaceAll("\\$\\{units}", request.getUnits().getText())
-                .replaceAll("\\$\\{difficulty}", String.valueOf(request.getDifficulty().getMinutes()));
+    public Mono<Recipe> get(RequestProperties request, String additionalQuery) throws RuntimeException {
+        String formatted = prepareRequestBody(request, additionalQuery);
         return openAiWebClient.post()
                 .bodyValue(formatted)
                 .exchangeToMono(resp -> resp.bodyToMono(OpenApiResponse.class))
                 .doOnSuccess(response -> log.debug("<<< Succeed openai response: {}", response))
                 .doOnError(err -> {
-                    // TODO: 11/01/2024 Add more specific request if error
+                    // TODO: 11/01/2024 Add more specific prompt-request if error
                     log.error("Recipe request failed", err);
                     throw new RuntimeException(err);
                 })
                 .map(this::parseRecipe)
                 .map(this::duplicatesCheck)
-                .timeout(Duration.ofMinutes(5))
+                .timeout(Duration.ofMinutes(RESPONSE_TIMEOUT))
                 .retryWhen(setupRetry())
                 .doOnError(err -> log.error("Reties weren't complete by {} attempts", MAX_ATTEMPTS, err))
                 .onErrorReturn(getStubRecipe());
     }
 
+    private String prepareRequestBody(RequestProperties request, String additionalQuery) {
+        OpenAiProperties.Models models = properties.conversation().models();
+        String additionalQueryReplacement = additionalQuery.isBlank()
+                ? ""
+                : "Also consider additional requirements from user: %s".formatted(additionalQuery);
+        String modelReplacement = Set.of(Languages.CH, Languages.JP, Languages.RU, Languages.FR, Languages.EN)
+                .contains(request.getLanguage()) ? models.wise() : models.cheap();
+        return REQUEST_PATTERN
+                .replaceAll("\\$\\{model}", modelReplacement)
+                .replaceAll("\\$\\{language}", request.getLanguage().getText())
+                .replaceAll("\\$\\{lightness}", request.getLightness().getText())
+                .replaceAll("\\$\\{units}", request.getUnits().getText())
+                .replaceAll("\\$\\{difficulty}", String.valueOf(request.getDifficulty().getMinutes()))
+                .replaceAll("\\$\\{additional_query}", additionalQueryReplacement);
+    }
+
     private Recipe parseRecipe(OpenApiResponse resp) {
         String content = resp.choices().get(0).message().content();
         int beginIndex = content.indexOf("{");
-        if (beginIndex != 0) {
-            log.warn("<<<< Invalid json: {}", content.split("\\{")[0].replaceAll("\\n", ""));
-        }
         content = content.substring(beginIndex)
                 .replaceAll("```json", "")
                 .replaceAll("```", "");
+        if (!content.startsWith("{")) {
+            log.warn("<<<< Invalid json: {}", content.split("\\{")[0].replaceAll("\\n", ""));
+        }
         try {
-            Recipe recipe = objectMapper.readValue(content, Recipe.class);
-            return recipe;
+            return objectMapper.readValue(content, Recipe.class);
         } catch (JsonProcessingException e) {
             log.error("Parsing error during the openai request", e);
             throw new RuntimeException(e);

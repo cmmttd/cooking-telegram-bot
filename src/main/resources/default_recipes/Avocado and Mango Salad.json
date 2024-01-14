@@ -1,0 +1,40 @@
+{
+  "id": "e5cf2533-12cb-4f2d-8f1b-1c57ce5ded3a",
+  "title": "Avocado and Mango Salad",
+  "properties": {
+    "lightness": "Light",
+    "units": "METRIC",
+    "cooking_time": 12
+  },
+  "short_description": "This refreshing and light salad is the perfect side dish for any summer meal. The combination of creamy avocado and sweet mango is simply delightful. It only takes a few minutes to prepare, making it the ideal recipe for a quick and healthy dish.",
+  "ingredients": [
+    "1 ripe avocado, peeled, pitted, and diced",
+    "1 ripe mango, peeled, pitted, and diced",
+    "1/4 red onion, thinly sliced",
+    "2 tablespoons fresh cilantro, chopped",
+    "1 tablespoon olive oil",
+    "1 tablespoon lime juice",
+    "Salt and pepper to taste"
+  ],
+  "steps": [
+    {
+      "index": 1,
+      "offset": 0,
+      "title": "Prepare the Ingredients",
+      "description": "Peel, pit, and dice the avocado and mango. Thinly slice the red onion and chop the fresh cilantro."
+    },
+    {
+      "index": 2,
+      "offset": 5,
+      "title": "Mix the Salad",
+      "description": "In a bowl, combine the diced avocado, mango, sliced red onion, and chopped cilantro. Drizzle with olive oil and lime juice, then toss gently to mix. Season with salt and pepper to taste."
+    },
+    {
+      "index": 3,
+      "offset": 10,
+      "title": "Serve",
+      "description": "Transfer the salad to a serving dish and enjoy as a delicious and refreshing side dish."
+    }
+  ],
+  "language": "EN"
+}
