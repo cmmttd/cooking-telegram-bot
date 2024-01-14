@@ -5,5 +5,5 @@ import com.belogrudovw.cookingbot.handler.Handler;
 import java.util.Set;
 
 public interface MessageHandler extends Handler {
-    Set<String> getSupportedMessageData();
+    Set<String> getSupported();
 }

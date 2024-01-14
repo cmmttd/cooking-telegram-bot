@@ -53,6 +53,7 @@ public class CookingCallbackHandler extends AbstractCallbackHandler {
         if (currentRecipe == null) {
             throw new IllegalChatStateException(chatId, "Recipe must be not null on the step: " + CURRENT_SCREEN);
         }
+        chat.setAwaitCustomQuery(false);
         var button = CookingButtons.valueOf(callbackQuery.data());
         switch (button) {
             case COOKING_NEXT -> {
@@ -70,6 +71,7 @@ public class CookingCallbackHandler extends AbstractCallbackHandler {
                 respond(chatId, orderService.prevScreen(CURRENT_SCREEN));
             }
         }
+        chatService.save(chat);
     }
 
     private void respondNextStep(Chat chat, long chatId) {

@@ -39,16 +39,19 @@ public abstract class AbstractCallbackHandler implements CallbackHandler {
     }
 
     // TODO: 13/01/2024 Move it to somewhere
-    public Mono<Void> showSpinner(Chat chat, UserAction.CallbackQuery callbackQuery, RequestProperties requestProperties) {
+    public Mono<Void> showSpinner(Chat chat, int messageId) {
         String spinnerString = "Beautiful wait spinner on the way...%nPlease wait until generation finishes: %s %s %s %s"
                 .formatted(
-                        requestProperties.getLanguage().getText(),
-                        requestProperties.getLightness().getText(),
-                        requestProperties.getDifficulty().getText(),
-                        requestProperties.getUnits().getText()
+                        chat.getRequestProperties().getLanguage().getText(),
+                        chat.getRequestProperties().getLightness().getText(),
+                        chat.getRequestProperties().getDifficulty().getText(),
+                        chat.getRequestProperties().getUnits().getText()
                 );
+        if (chat.isAwaitCustomQuery() && chat.getAdditionalQuery() != null) {
+            spinnerString += " " + chat.getAdditionalQuery();
+        }
         CustomScreen spinner = CustomScreen.builder().text(spinnerString).buttons(Collections.emptyList()).build();
-        return Mono.fromRunnable(() -> respond(chat.getId(), callbackQuery.message().messageId(), spinner));
+        return Mono.fromRunnable(() -> respond(chat.getId(), messageId, spinner));
     }
 
     public void respond(long chatId, long messageId, Screen nextScreen) {

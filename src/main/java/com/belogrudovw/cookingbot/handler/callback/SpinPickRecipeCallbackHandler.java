@@ -1,7 +1,6 @@
 package com.belogrudovw.cookingbot.handler.callback;
 
 import com.belogrudovw.cookingbot.domain.Chat;
-import com.belogrudovw.cookingbot.domain.GenerationMode;
 import com.belogrudovw.cookingbot.domain.Recipe;
 import com.belogrudovw.cookingbot.domain.buttons.SpinPickRecipeButtons;
 import com.belogrudovw.cookingbot.domain.screen.CustomScreen;
@@ -58,30 +57,29 @@ public class SpinPickRecipeCallbackHandler extends AbstractCallbackHandler {
             throw new IllegalChatStateException(chatId, "Recipe must be not null on the step: " + CURRENT_SCREEN);
         }
         var button = SpinPickRecipeButtons.valueOf(callbackQuery.data());
+        final int messageId = callbackQuery.message().messageId();
         switch (button) {
             case SPIN_PICK_RECIPE_START -> {
-                hideButtons(chat, callbackQuery, chatId);
+                hideButtons(chat, messageId, chatId);
                 cookingScheduleService.scheduleNexStep(chat);
             }
-            case SPIN_PICK_RECIPE_SPIN -> respondNewRecipe(chat, callbackQuery);
-            case SPIN_PICK_RECIPE_BACK -> respond(chatId, callbackQuery.message().messageId(), orderService.prevScreen(CURRENT_SCREEN));
+            case SPIN_PICK_RECIPE_SPIN -> respondNewRecipe(chat, messageId);
+            case SPIN_PICK_RECIPE_BACK -> respond(chatId, messageId, orderService.prevScreen(CURRENT_SCREEN));
         }
     }
 
-    private void hideButtons(Chat chat, UserAction.CallbackQuery callbackQuery, long chatId) {
+    private void hideButtons(Chat chat, int messageId, long chatId) {
         CustomScreen hidedButtonsScreen = CustomScreen.builder()
                 .buttons(Collections.emptyList())
                 .text(chat.getCurrentRecipe().toString())
                 .build();
-        respond(chatId, callbackQuery.message().messageId(), hidedButtonsScreen);
+        respond(chatId, messageId, hidedButtonsScreen);
     }
 
-    private void respondNewRecipe(Chat chat, UserAction.CallbackQuery callbackQuery) {
-        Mono<Void> showSpinner = showSpinner(chat, callbackQuery, chat.getRequestProperties());
+    private void respondNewRecipe(Chat chat, int messageId) {
+        Mono<Void> showSpinner = showSpinner(chat, messageId);
 
-        Mono<Recipe> monoRecipe = chat.getMode() == GenerationMode.NEW
-                ? recipeService.requestNew(chat)
-                : recipeService.getRandom(chat);
+        Mono<Recipe> monoRecipe = recipeService.getRandom(chat);
         showSpinner
                 .then(monoRecipe
                         .delaySubscription(Duration.ofMillis(300)))
@@ -93,6 +91,6 @@ public class SpinPickRecipeCallbackHandler extends AbstractCallbackHandler {
                         .buttons(CURRENT_SCREEN.getButtons())
                         .text(recipe.toString())
                         .build())
-                .subscribe(screen -> respond(chat.getId(), callbackQuery.message().messageId(), screen));
+                .subscribe(screen -> respond(chat.getId(), messageId, screen));
     }
 }

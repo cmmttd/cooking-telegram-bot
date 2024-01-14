@@ -1,7 +1,6 @@
 package com.belogrudovw.cookingbot.handler.callback;
 
 import com.belogrudovw.cookingbot.domain.Chat;
-import com.belogrudovw.cookingbot.domain.GenerationMode;
 import com.belogrudovw.cookingbot.domain.Recipe;
 import com.belogrudovw.cookingbot.domain.RequestProperties;
 import com.belogrudovw.cookingbot.domain.buttons.CallbackButton;
@@ -64,20 +63,37 @@ public class HomeCallbackHandler extends AbstractCallbackHandler {
         }
         var button = HomeButtons.valueOf(callbackQuery.data());
         chat.setPivotScreen(CURRENT_SCREEN);
-        chatService.save(chat);
+        chat.setAwaitCustomQuery(false);
+        final int messageId = callbackQuery.message().messageId();
         switch (button) {
-            case HOME_RANDOM -> respondAsync(chat, callbackQuery);
-            case HOME_HISTORY -> respond(chatId, callbackQuery.message().messageId(), buildNextScreenForHistory(chat));
-            case HOME_BACK -> respond(chatId, callbackQuery.message().messageId(), orderService.prevScreen(CURRENT_SCREEN));
+            case HOME_CUSTOM -> {
+                chat.setAwaitCustomQuery(true);
+                respond(chat.getId(), messageId, buildNextScreenForCustomQuery());
+            }
+            case HOME_RANDOM -> respondAsync(chat, messageId);
+            case HOME_HISTORY -> respond(chatId, messageId, buildNextScreenForHistory(chat));
+            case HOME_BACK -> respond(chatId, messageId, orderService.prevScreen(CURRENT_SCREEN));
         }
+        chatService.save(chat);
     }
 
-    private void respondAsync(Chat chat, UserAction.CallbackQuery callbackQuery) {
-        showSpinner(chat, callbackQuery, chat.getRequestProperties())
+    private CustomScreen buildNextScreenForCustomQuery() {
+        List<CallbackButton> backButton = orderService.nextScreen(CURRENT_SCREEN).getButtons().stream()
+                .filter(button -> button.getText().equals(Navigational.BACK.getText()))
+                .toList();
+        return CustomScreen.builder()
+                .text("Describe the desire dish, or count ingredients what you're have, or just type your mood...\n"
+                        + "_Max 200 symbols, so the shorter the better :)_")
+                .buttons(backButton)
+                .build();
+    }
+
+    private void respondAsync(Chat chat, int messageId) {
+        showSpinner(chat, messageId)
                 .then(recipeService.getRandom(chat)
                         .delaySubscription(Duration.ofMillis(500)))
-                .map(recipe -> buildNextScreenForRecipe(chat, GenerationMode.EXISTING, recipe))
-                .subscribe(screen -> respond(chat.getId(), callbackQuery.message().messageId(), screen));
+                .map(recipe -> buildNextScreenForRecipe(chat, recipe))
+                .subscribe(screen -> respond(chat.getId(), messageId, screen));
     }
 
     private CustomScreen buildNextScreenForHistory(Chat chat) {
@@ -98,8 +114,7 @@ public class HomeCallbackHandler extends AbstractCallbackHandler {
                 .build();
     }
 
-    private CustomScreen buildNextScreenForRecipe(Chat chat, GenerationMode mode, Recipe newRecipe) {
-        chat.setMode(mode);
+    private CustomScreen buildNextScreenForRecipe(Chat chat, Recipe newRecipe) {
         chatService.setNewRecipe(chat, newRecipe);
         Screen nextScreenTemplate = orderService.nextScreen(CURRENT_SCREEN);
         return CustomScreen.builder()

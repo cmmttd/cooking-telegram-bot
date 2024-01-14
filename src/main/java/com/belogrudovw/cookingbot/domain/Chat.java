@@ -13,12 +13,13 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Chat {
     long id;
-    GenerationMode mode;
     Recipe currentRecipe;
     int cookingProgress;
     List<Recipe> history;
     RequestProperties requestProperties;
     Screen pivotScreen;
+    boolean isAwaitCustomQuery;
+    String additionalQuery;
 
     public Chat(long id) {
         this.id = id;

@@ -1,1 +1,51 @@
-{"id":"0b3ea7fb-faae-4bc4-9d99-a531d9f69d77","title":"蜜汁烤鲑鱼","properties":{"lightness":"Any","units":"IMPERIAL","cooking_time":45},"short_description":"这是一个简单且迅速的蜜汁烤鲑鱼食谱，只需几个基本食材，即可在家享用佳肴。","ingredients":["1磅鲑鱼","2汤匙橄榄油","1汤匙蜂蜜","2茶匙苹果醋","1蒜瓣, 搗碎","盐和黑胡椒适量"],"steps":[{"index":1,"offset":0,"title":"预热烤箱","description":"将烤箱预热至400°F（大约200°C）。"},{"index":2,"offset":5,"title":"调制腌料","description":"在碗中混合橄榄油、蜜糖、苹果醋和搗碎的蒜瓣，加入盐和胡椒调味。"},{"index":3,"offset":10,"title":"准备鲑鱼","description":"取一个烘焙盘，并铺上烤箱油纸。将鲑鱼摆在烘焙盘上，之后将调好的腌料均匀涂抹在鲑鱼表面。"},{"index":4,"offset":20,"title":"烹饪鲑鱼","description":"将配有鲑鱼的烘焙盘放入烤箱中，烤20到25分钟，或直至鲑鱼熟透而不干涸。"},{"index":5,"offset":44,"title":"最后装饰","description":"亲鲑鱼洗净并充足。马上从烤箱网络, 都可以打扮实际放置的柠檬石楠和新裂解胡椒 归类如圣上、 放置几个PLATE Servetige。"}],"language":"CH"}
+{
+  "id": "0b3ea7fb-faae-4bc4-9d99-a531d9f69d77",
+  "title": "蜜汁烤鲑鱼",
+  "properties": {
+    "lightness": "Any",
+    "units": "IMPERIAL",
+    "cooking_time": 45
+  },
+  "short_description": "这是一个简单且迅速的蜜汁烤鲑鱼食谱，只需几个基本食材，即可在家享用佳肴。",
+  "ingredients": [
+    "1磅鲑鱼",
+    "2汤匙橄榄油",
+    "1汤匙蜂蜜",
+    "2茶匙苹果醋",
+    "1蒜瓣, 搗碎",
+    "盐和黑胡椒适量"
+  ],
+  "steps": [
+    {
+      "index": 1,
+      "offset": 0,
+      "title": "预热烤箱",
+      "description": "将烤箱预热至400°F（大约200°C）。"
+    },
+    {
+      "index": 2,
+      "offset": 5,
+      "title": "调制腌料",
+      "description": "在碗中混合橄榄油、蜜糖、苹果醋和搗碎的蒜瓣，加入盐和胡椒调味。"
+    },
+    {
+      "index": 3,
+      "offset": 10,
+      "title": "准备鲑鱼",
+      "description": "取一个烘焙盘，并铺上烤箱油纸。将鲑鱼摆在烘焙盘上，之后将调好的腌料均匀涂抹在鲑鱼表面。"
+    },
+    {
+      "index": 4,
+      "offset": 20,
+      "title": "烹饪鲑鱼",
+      "description": "将配有鲑鱼的烘焙盘放入烤箱中，烤20到25分钟，或直至鲑鱼熟透而不干涸。"
+    },
+    {
+      "index": 5,
+      "offset": 44,
+      "title": "最后装饰",
+      "description": "亲鲑鱼洗净并充足。马上从烤箱网络, 都可以打扮实际放置的柠檬石楠和新裂解胡椒 归类如圣上、 放置几个PLATE Servetige。"
+    }
+  ],
+  "language": "CH"
+}

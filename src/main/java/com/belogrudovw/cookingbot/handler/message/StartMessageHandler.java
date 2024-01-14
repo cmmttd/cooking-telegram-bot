@@ -17,7 +17,7 @@ public class StartMessageHandler implements MessageHandler {
     private final Handler defaultHandler;
 
     @Override
-    public Set<String> getSupportedMessageData() {
+    public Set<String> getSupported() {
         return Set.of("start", "START", "Start", "/start", "/START", "/Start");
     }
 

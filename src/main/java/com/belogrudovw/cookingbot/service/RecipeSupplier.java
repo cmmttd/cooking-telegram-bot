@@ -13,7 +13,8 @@ import java.util.UUID;
 import reactor.core.publisher.Mono;
 
 public interface RecipeSupplier {
-    Mono<Recipe> get(RequestProperties request);
+    // TODO: 14/01/2024 Replace RequestProperties by Map
+    Mono<Recipe> get(RequestProperties request, String additionalQuery);
 
     default Recipe getStubRecipe() {
         return STUB_RECIPE;

@@ -2,7 +2,7 @@ package com.belogrudovw.cookingbot.handler.callback;
 
 import java.util.Set;
 
-public interface DynamicCallbackHandler extends CallbackHandler {
+public interface PatternCallbackHandler extends CallbackHandler {
     String getPattern();
 
     @Override

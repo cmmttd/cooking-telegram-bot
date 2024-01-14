@@ -1,9 +1,9 @@
 package com.belogrudovw.cookingbot.handler;
 
 import com.belogrudovw.cookingbot.domain.screen.Screen;
+import com.belogrudovw.cookingbot.domain.telegram.UserAction;
 import com.belogrudovw.cookingbot.service.ChatService;
 import com.belogrudovw.cookingbot.service.ResponseService;
-import com.belogrudovw.cookingbot.domain.telegram.UserAction;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,7 @@ public class DefaultHandler implements Handler {
 
     @Override
     public void handle(UserAction action) {
-        log.debug("Default handler called for: {}", action);
+        log.info("Default handler called for: {}", action.toString().replaceAll("\n", ""));
         handle(action.getChatId());
     }
 
