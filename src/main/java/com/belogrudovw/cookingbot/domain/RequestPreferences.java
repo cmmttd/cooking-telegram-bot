@@ -18,7 +18,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public final class RequestProperties {
+public final class RequestPreferences {
     Languages language;
     Lightness lightness;
     MeasurementUnits units;

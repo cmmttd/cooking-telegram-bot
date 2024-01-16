@@ -2,13 +2,12 @@ package com.belogrudovw.cookingbot.handler.callback;
 
 import com.belogrudovw.cookingbot.domain.Chat;
 import com.belogrudovw.cookingbot.domain.buttons.LanguageButtons;
-import com.belogrudovw.cookingbot.domain.displayable.Languages;
 import com.belogrudovw.cookingbot.domain.screen.DefaultScreens;
 import com.belogrudovw.cookingbot.domain.screen.Screen;
-import com.belogrudovw.cookingbot.service.ChatService;
-import com.belogrudovw.cookingbot.service.OrderService;
-import com.belogrudovw.cookingbot.service.ResponseService;
 import com.belogrudovw.cookingbot.domain.telegram.UserAction;
+import com.belogrudovw.cookingbot.service.ChatService;
+import com.belogrudovw.cookingbot.service.InteractionService;
+import com.belogrudovw.cookingbot.service.OrderService;
 
 import java.util.Set;
 
@@ -26,11 +25,13 @@ public class SetupLangCallbackHandler extends AbstractCallbackHandler {
 
     ChatService chatService;
     OrderService orderService;
+    InteractionService interactionService;
 
-    public SetupLangCallbackHandler(ResponseService responseService, ChatService chatService, OrderService orderService) {
-        super(responseService, chatService);
+    public SetupLangCallbackHandler(ChatService chatService, OrderService orderService, InteractionService interactionService) {
+        super(chatService);
         this.chatService = chatService;
         this.orderService = orderService;
+        this.interactionService = interactionService;
     }
 
     @Override
@@ -40,10 +41,10 @@ public class SetupLangCallbackHandler extends AbstractCallbackHandler {
 
     @Override
     public void handleCallback(Chat chat, UserAction.CallbackQuery callbackQuery) {
-        LanguageButtons lang = LanguageButtons.valueOf(callbackQuery.data());
-        chat.getRequestProperties().setLanguage(Languages.from(lang.getText()));
+        LanguageButtons langButton = LanguageButtons.valueOf(callbackQuery.data());
+        chat.getRequestPreferences().setLanguage(langButton.getLanguage());
         chatService.save(chat);
         Screen screen = orderService.nextScreen(CURRENT_SCREEN);
-        respond(chat.getId(), callbackQuery.message().messageId(), screen);
+        interactionService.showResponse(chat, callbackQuery.message().messageId(), screen);
     }
 }

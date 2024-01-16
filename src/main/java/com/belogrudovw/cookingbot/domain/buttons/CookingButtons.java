@@ -1,21 +1,24 @@
 package com.belogrudovw.cookingbot.domain.buttons;
 
-import com.belogrudovw.cookingbot.domain.displayable.Navigational;
-import com.belogrudovw.cookingbot.domain.displayable.Displayable;
+import com.belogrudovw.cookingbot.lexic.StringToken;
 
 import lombok.Getter;
+
+import static com.belogrudovw.cookingbot.lexic.SingleValueTokens.CANCEL_TOKEN;
+import static com.belogrudovw.cookingbot.lexic.SingleValueTokens.NEXT_TOKEN;
+import static com.belogrudovw.cookingbot.lexic.SingleValueTokens.PAUSE_TOKEN;
 
 @Getter
 public enum CookingButtons implements CallbackButton {
 
-    COOKING_CANCEL(Navigational.CANCEL),
-    COOKING_PAUSE(Navigational.PAUSE),
-    COOKING_NEXT(Navigational.NEXT);
+    COOKING_CANCEL(CANCEL_TOKEN),
+    COOKING_PAUSE(PAUSE_TOKEN),
+    COOKING_NEXT(NEXT_TOKEN);
 
-    private final String text;
+    private final StringToken textToken;
 
-    CookingButtons(Displayable displayable) {
-        this.text = displayable.getText();
+    CookingButtons(StringToken stringToken) {
+        this.textToken = stringToken;
     }
 
     @Override

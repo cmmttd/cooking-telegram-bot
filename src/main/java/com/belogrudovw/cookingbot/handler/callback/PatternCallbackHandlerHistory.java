@@ -5,12 +5,13 @@ import com.belogrudovw.cookingbot.domain.Recipe;
 import com.belogrudovw.cookingbot.domain.screen.CustomScreen;
 import com.belogrudovw.cookingbot.domain.screen.DefaultScreens;
 import com.belogrudovw.cookingbot.domain.screen.Screen;
+import com.belogrudovw.cookingbot.domain.telegram.UserAction;
 import com.belogrudovw.cookingbot.error.RecipeNotFoundException;
+import com.belogrudovw.cookingbot.lexic.SimpleStringToken;
 import com.belogrudovw.cookingbot.service.ChatService;
+import com.belogrudovw.cookingbot.service.InteractionService;
 import com.belogrudovw.cookingbot.service.OrderService;
 import com.belogrudovw.cookingbot.service.RecipeService;
-import com.belogrudovw.cookingbot.service.ResponseService;
-import com.belogrudovw.cookingbot.domain.telegram.UserAction;
 
 import java.util.UUID;
 
@@ -31,13 +32,15 @@ public class PatternCallbackHandlerHistory extends AbstractPatternCallbackHandle
     ChatService chatService;
     RecipeService recipeService;
     OrderService orderService;
+    InteractionService interactionService;
 
-    public PatternCallbackHandlerHistory(ResponseService responseService, ChatService chatService, RecipeService recipeService,
-                                         OrderService orderService) {
-        super(responseService, chatService);
+    public PatternCallbackHandlerHistory(ChatService chatService, RecipeService recipeService, OrderService orderService,
+                                         InteractionService interactionService) {
+        super(chatService);
         this.chatService = chatService;
         this.recipeService = recipeService;
         this.orderService = orderService;
+        this.interactionService = interactionService;
     }
 
     @Override
@@ -51,12 +54,12 @@ public class PatternCallbackHandlerHistory extends AbstractPatternCallbackHandle
         String[] recipeIdString = callbackQuery.data().split(HOME_HISTORY_CALLBACK_BASE);
         UUID recipeId = UUID.fromString(recipeIdString[1]);
         Recipe recipe = recipeService.findById(recipeId)
-                .orElseThrow(() -> new RecipeNotFoundException(chat.getId(), "Recipe not found for: %s".formatted(recipeId)));
+                .orElseThrow(() -> new RecipeNotFoundException(chat, "Recipe not found for: %s".formatted(recipeId)));
         chatService.setNewRecipe(chat, recipe);
         Screen screen = CustomScreen.builder()
                 .buttons(orderService.nextScreen(CURRENT_SCREEN).getButtons())
-                .text(recipe.toString())
+                .textToken(new SimpleStringToken(recipe.toFormattedString(chat.getRequestPreferences().getLanguage())))
                 .build();
-        respond(chat.getId(), callbackQuery.message().messageId(), screen);
+        interactionService.showResponse(chat, callbackQuery.message().messageId(), screen);
     }
 }

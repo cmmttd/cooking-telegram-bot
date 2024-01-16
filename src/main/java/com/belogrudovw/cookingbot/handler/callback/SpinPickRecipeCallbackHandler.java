@@ -1,18 +1,18 @@
 package com.belogrudovw.cookingbot.handler.callback;
 
 import com.belogrudovw.cookingbot.domain.Chat;
-import com.belogrudovw.cookingbot.domain.Recipe;
 import com.belogrudovw.cookingbot.domain.buttons.SpinPickRecipeButtons;
 import com.belogrudovw.cookingbot.domain.screen.CustomScreen;
 import com.belogrudovw.cookingbot.domain.screen.DefaultScreens;
 import com.belogrudovw.cookingbot.domain.screen.Screen;
 import com.belogrudovw.cookingbot.domain.telegram.UserAction;
 import com.belogrudovw.cookingbot.error.IllegalChatStateException;
+import com.belogrudovw.cookingbot.lexic.SimpleStringToken;
 import com.belogrudovw.cookingbot.service.ChatService;
 import com.belogrudovw.cookingbot.service.CookingScheduleService;
+import com.belogrudovw.cookingbot.service.InteractionService;
 import com.belogrudovw.cookingbot.service.OrderService;
 import com.belogrudovw.cookingbot.service.RecipeService;
-import com.belogrudovw.cookingbot.service.ResponseService;
 
 import java.time.Duration;
 import java.util.Collections;
@@ -35,14 +35,17 @@ public class SpinPickRecipeCallbackHandler extends AbstractCallbackHandler {
     OrderService orderService;
     RecipeService recipeService;
     CookingScheduleService cookingScheduleService;
+    InteractionService interactionService;
 
-    public SpinPickRecipeCallbackHandler(ResponseService responseService, ChatService chatService, OrderService orderService,
-                                         RecipeService recipeService, CookingScheduleService cookingScheduleService) {
-        super(responseService, chatService);
+
+    public SpinPickRecipeCallbackHandler(ChatService chatService, OrderService orderService, RecipeService recipeService,
+                                         CookingScheduleService cookingScheduleService, InteractionService interactionService) {
+        super(chatService);
         this.chatService = chatService;
         this.orderService = orderService;
         this.recipeService = recipeService;
         this.cookingScheduleService = cookingScheduleService;
+        this.interactionService = interactionService;
     }
 
     @Override
@@ -52,36 +55,33 @@ public class SpinPickRecipeCallbackHandler extends AbstractCallbackHandler {
 
     @Override
     public void handleCallback(Chat chat, UserAction.CallbackQuery callbackQuery) {
-        long chatId = chat.getId();
         if (chat.getCurrentRecipe() == null) {
-            throw new IllegalChatStateException(chatId, "Recipe must be not null on the step: " + CURRENT_SCREEN);
+            throw new IllegalChatStateException(chat, "Recipe must be not null on the step: " + CURRENT_SCREEN);
         }
         var button = SpinPickRecipeButtons.valueOf(callbackQuery.data());
         final int messageId = callbackQuery.message().messageId();
         switch (button) {
             case SPIN_PICK_RECIPE_START -> {
-                hideButtons(chat, messageId, chatId);
+                hideButtons(chat, messageId);
                 cookingScheduleService.scheduleNexStep(chat);
             }
             case SPIN_PICK_RECIPE_SPIN -> respondNewRecipe(chat, messageId);
-            case SPIN_PICK_RECIPE_BACK -> respond(chatId, messageId, orderService.prevScreen(CURRENT_SCREEN));
+            case SPIN_PICK_RECIPE_BACK -> interactionService.showResponse(chat, messageId, orderService.prevScreen(CURRENT_SCREEN));
         }
     }
 
-    private void hideButtons(Chat chat, int messageId, long chatId) {
+    private void hideButtons(Chat chat, int messageId) {
+        String recipeString = chat.getCurrentRecipe().toFormattedString(chat.getRequestPreferences().getLanguage());
         CustomScreen hidedButtonsScreen = CustomScreen.builder()
                 .buttons(Collections.emptyList())
-                .text(chat.getCurrentRecipe().toString())
+                .textToken(new SimpleStringToken(recipeString))
                 .build();
-        respond(chatId, messageId, hidedButtonsScreen);
+        interactionService.showResponse(chat, messageId, hidedButtonsScreen);
     }
 
     private void respondNewRecipe(Chat chat, int messageId) {
-        Mono<Void> showSpinner = showSpinner(chat, messageId);
-
-        Mono<Recipe> monoRecipe = recipeService.getRandom(chat);
-        showSpinner
-                .then(monoRecipe
+        Mono.fromRunnable(() -> interactionService.showSpinner(chat, messageId))
+                .then(recipeService.getRandom(chat)
                         .delaySubscription(Duration.ofMillis(300)))
                 .map(recipe -> {
                     chatService.setNewRecipe(chat, recipe);
@@ -89,8 +89,8 @@ public class SpinPickRecipeCallbackHandler extends AbstractCallbackHandler {
                 })
                 .map(recipe -> CustomScreen.builder()
                         .buttons(CURRENT_SCREEN.getButtons())
-                        .text(recipe.toString())
+                        .textToken(new SimpleStringToken(recipe.toFormattedString(chat.getRequestPreferences().getLanguage())))
                         .build())
-                .subscribe(screen -> respond(chat.getId(), messageId, screen));
+                .subscribe(screen -> interactionService.showResponse(chat, messageId, screen));
     }
 }

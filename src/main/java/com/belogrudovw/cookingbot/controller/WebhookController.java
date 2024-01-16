@@ -1,6 +1,6 @@
 package com.belogrudovw.cookingbot.controller;
 
-import com.belogrudovw.cookingbot.service.TelegramHandlerDispatcher;
+import com.belogrudovw.cookingbot.service.HandlerDispatcher;
 import com.belogrudovw.cookingbot.domain.telegram.UserAction;
 
 import jakarta.validation.Valid;
@@ -16,11 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class WebhookController {
 
-    private final TelegramHandlerDispatcher telegramHandlerDispatcher;
+    private final HandlerDispatcher handlerDispatcher;
 
     @PostMapping("/webhook/")
     public boolean post(@Valid @RequestBody UserAction action) {
-        telegramHandlerDispatcher.dispatch(action);
+        handlerDispatcher.dispatch(action);
         return true;
     }
 }

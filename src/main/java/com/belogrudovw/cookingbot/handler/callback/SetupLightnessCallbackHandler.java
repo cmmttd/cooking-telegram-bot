@@ -2,13 +2,12 @@ package com.belogrudovw.cookingbot.handler.callback;
 
 import com.belogrudovw.cookingbot.domain.Chat;
 import com.belogrudovw.cookingbot.domain.buttons.LightnessButtons;
-import com.belogrudovw.cookingbot.domain.displayable.Lightness;
 import com.belogrudovw.cookingbot.domain.screen.DefaultScreens;
 import com.belogrudovw.cookingbot.domain.screen.Screen;
-import com.belogrudovw.cookingbot.service.ChatService;
-import com.belogrudovw.cookingbot.service.OrderService;
-import com.belogrudovw.cookingbot.service.ResponseService;
 import com.belogrudovw.cookingbot.domain.telegram.UserAction;
+import com.belogrudovw.cookingbot.service.ChatService;
+import com.belogrudovw.cookingbot.service.InteractionService;
+import com.belogrudovw.cookingbot.service.OrderService;
 
 import java.util.Set;
 
@@ -26,11 +25,13 @@ public class SetupLightnessCallbackHandler extends AbstractCallbackHandler {
 
     ChatService chatService;
     OrderService orderService;
+    InteractionService interactionService;
 
-    public SetupLightnessCallbackHandler(ResponseService responseService, ChatService chatService, OrderService orderService) {
-        super(responseService, chatService);
+    public SetupLightnessCallbackHandler(ChatService chatService, OrderService orderService, InteractionService interactionService) {
+        super(chatService);
         this.chatService = chatService;
         this.orderService = orderService;
+        this.interactionService = interactionService;
     }
 
     @Override
@@ -46,12 +47,12 @@ public class SetupLightnessCallbackHandler extends AbstractCallbackHandler {
                     SETUP_LIGHTNESS_MODERATE,
                     SETUP_LIGHTNESS_HEAVY,
                     SETUP_LIGHTNESS_ANY -> {
-                chat.getRequestProperties().setLightness(Lightness.from(button.getText()));
+                chat.getRequestPreferences().setLightness(button.getLightness());
                 chatService.save(chat);
                 yield orderService.nextScreen(CURRENT_SCREEN);
             }
             case SETUP_LIGHTNESS_BACK -> orderService.prevScreen(CURRENT_SCREEN);
         };
-        respond(chat.getId(), callbackQuery.message().messageId(), screen);
+        interactionService.showResponse(chat, callbackQuery.message().messageId(), screen);
     }
 }

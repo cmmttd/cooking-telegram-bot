@@ -1,9 +1,7 @@
 package com.belogrudovw.cookingbot.domain.displayable;
 
-public interface Displayable {
-    String getText();
+import com.belogrudovw.cookingbot.lexic.StringToken;
 
-    default String getIcon(){
-        return "";
-    }
+public interface Displayable {
+    StringToken getDisplayable();
 }

@@ -2,7 +2,7 @@ package com.belogrudovw.cookingbot.service.impl;
 
 import com.belogrudovw.cookingbot.config.OpenAiProperties;
 import com.belogrudovw.cookingbot.domain.Recipe;
-import com.belogrudovw.cookingbot.domain.RequestProperties;
+import com.belogrudovw.cookingbot.domain.RequestPreferences;
 import com.belogrudovw.cookingbot.domain.displayable.Languages;
 import com.belogrudovw.cookingbot.service.RecipeSupplier;
 import com.belogrudovw.cookingbot.storage.Storage;
@@ -52,7 +52,7 @@ public class OpenAiClient implements RecipeSupplier {
             }
             """;
     static final int MAX_ATTEMPTS = 3;
-    static final int RESPONSE_TIMEOUT = 10;
+    static final int RESPONSE_TIMEOUT_MIN = 10;
 
     WebClient openAiWebClient;
     OpenAiProperties properties;
@@ -60,7 +60,7 @@ public class OpenAiClient implements RecipeSupplier {
     Storage<UUID, Recipe> recipeStorage;
 
     @Override
-    public Mono<Recipe> get(RequestProperties request, String additionalQuery) throws RuntimeException {
+    public Mono<Recipe> get(RequestPreferences request, String additionalQuery) throws RuntimeException {
         String formatted = prepareRequestBody(request, additionalQuery);
         return openAiWebClient.post()
                 .bodyValue(formatted)
@@ -73,13 +73,13 @@ public class OpenAiClient implements RecipeSupplier {
                 })
                 .map(this::parseRecipe)
                 .map(this::duplicatesCheck)
-                .timeout(Duration.ofMinutes(RESPONSE_TIMEOUT))
+                .timeout(Duration.ofMinutes(RESPONSE_TIMEOUT_MIN))
                 .retryWhen(setupRetry())
                 .doOnError(err -> log.error("Reties weren't complete by {} attempts", MAX_ATTEMPTS, err))
                 .onErrorReturn(getStubRecipe());
     }
 
-    private String prepareRequestBody(RequestProperties request, String additionalQuery) {
+    private String prepareRequestBody(RequestPreferences request, String additionalQuery) {
         OpenAiProperties.Models models = properties.conversation().models();
         String additionalQueryReplacement = additionalQuery.isBlank()
                 ? ""
@@ -88,9 +88,9 @@ public class OpenAiClient implements RecipeSupplier {
                 .contains(request.getLanguage()) ? models.wise() : models.cheap();
         return REQUEST_PATTERN
                 .replaceAll("\\$\\{model}", modelReplacement)
-                .replaceAll("\\$\\{language}", request.getLanguage().getText())
-                .replaceAll("\\$\\{lightness}", request.getLightness().getText())
-                .replaceAll("\\$\\{units}", request.getUnits().getText())
+                .replaceAll("\\$\\{language}", request.getLanguage().getLangName())
+                .replaceAll("\\$\\{lightness}", request.getLightness().name())
+                .replaceAll("\\$\\{units}", request.getUnits().name())
                 .replaceAll("\\$\\{difficulty}", String.valueOf(request.getDifficulty().getMinutes()))
                 .replaceAll("\\$\\{additional_query}", additionalQueryReplacement);
     }

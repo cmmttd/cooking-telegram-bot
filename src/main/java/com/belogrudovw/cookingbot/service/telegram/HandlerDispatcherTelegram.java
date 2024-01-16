@@ -1,4 +1,4 @@
-package com.belogrudovw.cookingbot.service.impl;
+package com.belogrudovw.cookingbot.service.telegram;
 
 import com.belogrudovw.cookingbot.domain.telegram.UserAction;
 import com.belogrudovw.cookingbot.handler.Handler;
@@ -7,7 +7,7 @@ import com.belogrudovw.cookingbot.handler.callback.PatternCallbackHandler;
 import com.belogrudovw.cookingbot.handler.message.MessageHandler;
 import com.belogrudovw.cookingbot.handler.message.PatternMessageHandler;
 import com.belogrudovw.cookingbot.service.ChatService;
-import com.belogrudovw.cookingbot.service.TelegramHandlerDispatcher;
+import com.belogrudovw.cookingbot.service.HandlerDispatcher;
 
 import java.util.Map;
 import java.util.Optional;
@@ -24,7 +24,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class TelegramHandlerDispatcherCommon implements TelegramHandlerDispatcher {
+public class HandlerDispatcherTelegram implements HandlerDispatcher {
 
     ChatService chatService;
     Handler defaultHandler;

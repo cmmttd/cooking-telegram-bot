@@ -3,6 +3,7 @@ package com.belogrudovw.cookingbot.domain;
 import com.belogrudovw.cookingbot.domain.displayable.Languages;
 import com.belogrudovw.cookingbot.domain.displayable.Lightness;
 import com.belogrudovw.cookingbot.domain.displayable.MeasurementUnits;
+import com.belogrudovw.cookingbot.lexic.MultilingualTokens;
 
 import java.util.List;
 import java.util.UUID;
@@ -44,22 +45,22 @@ public final class Recipe {
     @NotNull
     Languages language;
 
-    @Override
-    public String toString() {
+    public String toFormattedString(Languages language) {
+        String minutesString = MultilingualTokens.MINUTES_TOKEN.in(language);
         String stepsString = steps.stream()
-                .map(step -> "(+" + step.offset() + " min) " + step.title())
+                .map(step -> "(+%d %s) %s".formatted(step.offset(), minutesString, step.title()))
                 .collect(Collectors.joining("\n • ", " • ", ""));
         String ingredientsString = ingredients.stream()
                 .collect(Collectors.joining("\n • ", " • ", ""));
         return """
-                *%s - %s*
+                *%s - %s %s*
                 %s
                 ---
                 %s
                 ---
                 %s
                 """
-                .formatted(title, properties.cookingTime, shortDescription, ingredientsString, stepsString);
+                .formatted(title, properties.cookingTime, minutesString, shortDescription, ingredientsString, stepsString);
     }
 
     public record Step(@Positive int index,

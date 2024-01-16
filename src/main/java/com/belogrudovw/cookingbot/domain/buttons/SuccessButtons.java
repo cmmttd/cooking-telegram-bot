@@ -1,16 +1,20 @@
 package com.belogrudovw.cookingbot.domain.buttons;
 
+import com.belogrudovw.cookingbot.lexic.StringToken;
+
 import lombok.Getter;
+
+import static com.belogrudovw.cookingbot.lexic.SingleValueTokens.SUCCESS_BUTTON_TOKEN;
 
 @Getter
 public enum SuccessButtons implements CallbackButton {
 
-    SUCCESS("💕");
+    SUCCESS(SUCCESS_BUTTON_TOKEN);
 
-    private final String text;
+    private final StringToken textToken;
 
-    SuccessButtons(String string) {
-        this.text = string;
+    SuccessButtons(StringToken string) {
+        this.textToken = string;
     }
 
     @Override
