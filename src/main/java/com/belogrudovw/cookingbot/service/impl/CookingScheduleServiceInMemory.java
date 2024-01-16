@@ -2,19 +2,17 @@ package com.belogrudovw.cookingbot.service.impl;
 
 import com.belogrudovw.cookingbot.domain.Chat;
 import com.belogrudovw.cookingbot.domain.Recipe;
-import com.belogrudovw.cookingbot.domain.buttons.CallbackButton;
-import com.belogrudovw.cookingbot.domain.buttons.CookingButtons;
+import com.belogrudovw.cookingbot.domain.screen.CustomScreen;
 import com.belogrudovw.cookingbot.domain.screen.DefaultScreens;
-import com.belogrudovw.cookingbot.domain.telegram.Keyboard;
 import com.belogrudovw.cookingbot.error.RecipeNotFoundException;
+import com.belogrudovw.cookingbot.lexic.SimpleStringToken;
 import com.belogrudovw.cookingbot.service.ChatService;
 import com.belogrudovw.cookingbot.service.CookingScheduleService;
+import com.belogrudovw.cookingbot.service.InteractionService;
 import com.belogrudovw.cookingbot.service.RecipeService;
-import com.belogrudovw.cookingbot.service.ResponseService;
 
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -34,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import static com.belogrudovw.cookingbot.util.KeyboardBuilder.buildDefaultKeyboard;
+import static com.belogrudovw.cookingbot.domain.screen.DefaultScreens.COOKING;
 
 @Slf4j
 @Service
@@ -46,8 +44,8 @@ public class CookingScheduleServiceInMemory implements CookingScheduleService {
     Map<Long, Set<Long>> timestampsByChatId = new ConcurrentHashMap<>();
 
     ChatService chatService;
-    ResponseService responseService;
     RecipeService recipeService;
+    InteractionService interactionService;
 
     // TODO: 29/12/2023 Issue#18 Rethink all approach for delayed tasks execution
     //  1. perhaps, do not duplicate logic and use callback handler as reference
@@ -105,7 +103,8 @@ public class CookingScheduleServiceInMemory implements CookingScheduleService {
         Map<Long, UUID> completedTaskMap = new HashMap<>();
         expiredTasks.forEach((timestamp, tasks) -> {
             tasks.forEach((chatId, task) -> {
-                sendNextStepMessage(chatId, task);
+                Chat chat = chatService.findById(chatId);
+                sendNextStepMessage(chat, task);
                 updateCookingProgress(chatId, task);
                 removeTimestamp(chatId, timestamp);
                 completedTaskMap.put(chatId, task.recipeId());
@@ -115,12 +114,15 @@ public class CookingScheduleServiceInMemory implements CookingScheduleService {
         completedTaskMap.forEach(this::sendCompleteMessage);
     }
 
-    private void sendNextStepMessage(long chatId, RecipeStepTask task) {
+    private void sendNextStepMessage(Chat chat, RecipeStepTask task) {
         Recipe recipe = recipeService.findById(task.recipeId())
-                .orElseThrow(() -> new RecipeNotFoundException(chatId, "Recipe not found for: %s".formatted(task.recipeId())));
+                .orElseThrow(() -> new RecipeNotFoundException(chat, "Recipe not found for: %s".formatted(task.recipeId())));
         Recipe.Step step = recipe.getSteps().get(task.stepCount());
-        Keyboard keyboard = buildDefaultKeyboard(Arrays.stream(CookingButtons.values()).map(CallbackButton.class::cast).toList());
-        responseService.sendMessage(chatId, step.toString(), keyboard);
+        CustomScreen customScreen = CustomScreen.builder()
+                .buttons(COOKING.getButtons())
+                .textToken(new SimpleStringToken(step.toString()))
+                .build();
+        interactionService.showResponse(chat, customScreen);
     }
 
     private void updateCookingProgress(long chatId, RecipeStepTask task) {
@@ -138,9 +140,7 @@ public class CookingScheduleServiceInMemory implements CookingScheduleService {
         if (timestampsByChatId.get(chatId).isEmpty()) {
             log.info("User from chat {} has been finished the recipe: {}", chatId, recipeId);
             timestampsByChatId.remove(chatId);
-            DefaultScreens nextScreen = DefaultScreens.SUCCESS;
-            Keyboard keyboard = buildDefaultKeyboard(nextScreen.getButtons());
-            responseService.sendMessage(chatId, nextScreen.getText(), keyboard);
+            interactionService.showResponse(chatService.findById(chatId), DefaultScreens.SUCCESS);
         }
     }
 

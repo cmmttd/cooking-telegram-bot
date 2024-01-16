@@ -1,7 +1,9 @@
 package com.belogrudovw.cookingbot.domain.buttons;
 
+import com.belogrudovw.cookingbot.lexic.StringToken;
+
 public interface CallbackButton {
-    String getText();
+    StringToken getTextToken();
 
     String getCallbackData();
 }

@@ -1,26 +1,26 @@
 package com.belogrudovw.cookingbot.domain.buttons;
 
-import com.belogrudovw.cookingbot.domain.displayable.Displayable;
-import com.belogrudovw.cookingbot.domain.displayable.Navigational;
+import com.belogrudovw.cookingbot.lexic.StringToken;
 
 import lombok.Getter;
+
+import static com.belogrudovw.cookingbot.lexic.MultilingualTokens.REQUEST_CUSTOM_TOKEN;
+import static com.belogrudovw.cookingbot.lexic.MultilingualTokens.REQUEST_HISTORY_TOKEN;
+import static com.belogrudovw.cookingbot.lexic.MultilingualTokens.REQUEST_RANDOM_TOKEN;
+import static com.belogrudovw.cookingbot.lexic.SingleValueTokens.BACK_TOKEN;
 
 @Getter
 public enum HomeButtons implements CallbackButton {
 
-    HOME_CUSTOM("New custom"),
-    HOME_RANDOM("New random"),
-    HOME_HISTORY("History"),
-    HOME_BACK(Navigational.BACK);
+    HOME_CUSTOM(REQUEST_CUSTOM_TOKEN),
+    HOME_RANDOM(REQUEST_RANDOM_TOKEN),
+    HOME_HISTORY(REQUEST_HISTORY_TOKEN),
+    HOME_BACK(BACK_TOKEN);
 
-    private final String text;
+    private final StringToken textToken;
 
-    HomeButtons(String string) {
-        this.text = string;
-    }
-
-    HomeButtons(Displayable displayable) {
-        this.text = displayable.getText();
+    HomeButtons(StringToken stringToken) {
+        this.textToken = stringToken;
     }
 
     @Override

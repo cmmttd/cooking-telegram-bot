@@ -8,10 +8,11 @@ import com.belogrudovw.cookingbot.domain.screen.DefaultScreens;
 import com.belogrudovw.cookingbot.domain.screen.Screen;
 import com.belogrudovw.cookingbot.domain.telegram.UserAction;
 import com.belogrudovw.cookingbot.error.IllegalChatStateException;
+import com.belogrudovw.cookingbot.lexic.SimpleStringToken;
 import com.belogrudovw.cookingbot.service.ChatService;
 import com.belogrudovw.cookingbot.service.CookingScheduleService;
+import com.belogrudovw.cookingbot.service.InteractionService;
 import com.belogrudovw.cookingbot.service.OrderService;
-import com.belogrudovw.cookingbot.service.ResponseService;
 
 import java.time.Duration;
 import java.util.Set;
@@ -32,13 +33,15 @@ public class CookingCallbackHandler extends AbstractCallbackHandler {
     ChatService chatService;
     OrderService orderService;
     CookingScheduleService cookingScheduleService;
+    InteractionService interactionService;
 
-    public CookingCallbackHandler(ResponseService responseService, ChatService chatService, OrderService orderService,
-                                  CookingScheduleService cookingScheduleService) {
-        super(responseService, chatService);
+    public CookingCallbackHandler(ChatService chatService, OrderService orderService, CookingScheduleService cookingScheduleService,
+                                  InteractionService interactionService) {
+        super(chatService);
         this.orderService = orderService;
         this.cookingScheduleService = cookingScheduleService;
         this.chatService = chatService;
+        this.interactionService = interactionService;
     }
 
     @Override
@@ -48,49 +51,51 @@ public class CookingCallbackHandler extends AbstractCallbackHandler {
 
     @Override
     public void handleCallback(Chat chat, UserAction.CallbackQuery callbackQuery) {
-        long chatId = chat.getId();
         Recipe currentRecipe = chat.getCurrentRecipe();
         if (currentRecipe == null) {
-            throw new IllegalChatStateException(chatId, "Recipe must be not null on the step: " + CURRENT_SCREEN);
+            throw new IllegalChatStateException(chat, "Recipe must be not null on the step: " + CURRENT_SCREEN);
         }
         chat.setAwaitCustomQuery(false);
         var button = CookingButtons.valueOf(callbackQuery.data());
         switch (button) {
-            case COOKING_NEXT -> {
-                Mono.fromRunnable(() -> respondNextStep(chat, chatId))
-                        .then(Mono.fromRunnable(() -> cookingScheduleService.scheduleNexStep(chat)))
-                        .then(Mono.fromRunnable(() -> congratulateIfCompleted(chat, currentRecipe, chatId))
-                                .delaySubscription(Duration.ofMillis(1000)))
-                        .subscribe();
-            }
+            case COOKING_NEXT -> respondNextAsync(chat, currentRecipe);
             case COOKING_PAUSE -> cookingScheduleService.cancelSchedule(chat);
-            case COOKING_CANCEL -> {
-                cookingScheduleService.cancelSchedule(chat);
-                chat.setCurrentRecipe(null);
-                chat.setCookingProgress(0);
-                respond(chatId, orderService.prevScreen(CURRENT_SCREEN));
-            }
+            case COOKING_CANCEL -> respondCancel(chat);
         }
         chatService.save(chat);
     }
 
-    private void respondNextStep(Chat chat, long chatId) {
-        chatService.incrementProgressAndGetStep(chat)
-                .map(this::buildCustomScreenForRecipeStep)
-                .ifPresent(screen -> respond(chatId, screen));
+    private void respondNextAsync(Chat chat, Recipe currentRecipe) {
+        Mono.fromRunnable(() -> respondNextStep(chat))
+                .then(Mono.fromRunnable(() -> cookingScheduleService.scheduleNexStep(chat)))
+                .then(Mono.fromRunnable(() -> congratulateIfCompleted(chat, currentRecipe))
+                        .delaySubscription(Duration.ofMillis(1000)))
+                .subscribe();
     }
 
-    private void congratulateIfCompleted(Chat chat, Recipe currentRecipe, long chatId) {
-        if (currentRecipe.getSteps().size() == chat.getCookingProgress()) {
-            log.info("User from chat {} complete the recipe {}", chatId, currentRecipe.getId());
-            respond(chat.getId(), DefaultScreens.SUCCESS);
-        }
+    private void respondNextStep(Chat chat) {
+        chatService.incrementProgressAndGetStep(chat)
+                .map(this::buildCustomScreenForRecipeStep)
+                .ifPresent(screen -> interactionService.showResponse(chat, screen));
     }
 
     private CustomScreen buildCustomScreenForRecipeStep(Recipe.Step step) {
         return CustomScreen.builder()
                 .buttons(CURRENT_SCREEN.getButtons())
-                .text(step.toString())
+                .textToken(new SimpleStringToken(step.toString()))
                 .build();
+    }
+
+    private void congratulateIfCompleted(Chat chat, Recipe currentRecipe) {
+        if (currentRecipe.getSteps().size() == chat.getCookingProgress()) {
+            log.info("User from chat {} complete the recipe {}", chat.getId(), currentRecipe.getId());
+            interactionService.showResponse(chat, DefaultScreens.SUCCESS);
+        }
+    }
+
+    private void respondCancel(Chat chat) {
+        cookingScheduleService.cancelSchedule(chat);
+        chat.setCookingProgress(0);
+        interactionService.showResponse(chat, orderService.prevScreen(CURRENT_SCREEN));
     }
 }

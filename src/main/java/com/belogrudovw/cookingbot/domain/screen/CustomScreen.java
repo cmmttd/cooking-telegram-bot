@@ -1,6 +1,7 @@
 package com.belogrudovw.cookingbot.domain.screen;
 
 import com.belogrudovw.cookingbot.domain.buttons.CallbackButton;
+import com.belogrudovw.cookingbot.lexic.StringToken;
 
 import java.util.List;
 
@@ -13,6 +14,6 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public final class CustomScreen implements Screen {
-    String text;
+    StringToken textToken;
     List<CallbackButton> buttons;
 }

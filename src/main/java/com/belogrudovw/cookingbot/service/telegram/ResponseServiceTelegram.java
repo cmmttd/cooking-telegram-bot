@@ -1,4 +1,4 @@
-package com.belogrudovw.cookingbot.service.impl;
+package com.belogrudovw.cookingbot.service.telegram;
 
 import com.belogrudovw.cookingbot.domain.telegram.Keyboard;
 import com.belogrudovw.cookingbot.service.ResponseService;
@@ -14,7 +14,7 @@ import static com.belogrudovw.cookingbot.util.StringUtil.escapeCharacters;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ResponseServiceAsync implements ResponseService {
+public class ResponseServiceTelegram implements ResponseService {
 
     private final WebClient telegramWebClient;
 

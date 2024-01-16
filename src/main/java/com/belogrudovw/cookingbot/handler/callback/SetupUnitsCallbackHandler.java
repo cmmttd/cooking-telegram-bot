@@ -2,13 +2,12 @@ package com.belogrudovw.cookingbot.handler.callback;
 
 import com.belogrudovw.cookingbot.domain.Chat;
 import com.belogrudovw.cookingbot.domain.buttons.MeasurementUnitButtons;
-import com.belogrudovw.cookingbot.domain.displayable.MeasurementUnits;
 import com.belogrudovw.cookingbot.domain.screen.DefaultScreens;
 import com.belogrudovw.cookingbot.domain.screen.Screen;
-import com.belogrudovw.cookingbot.service.ChatService;
-import com.belogrudovw.cookingbot.service.OrderService;
-import com.belogrudovw.cookingbot.service.ResponseService;
 import com.belogrudovw.cookingbot.domain.telegram.UserAction;
+import com.belogrudovw.cookingbot.service.ChatService;
+import com.belogrudovw.cookingbot.service.InteractionService;
+import com.belogrudovw.cookingbot.service.OrderService;
 
 import java.util.Set;
 
@@ -26,11 +25,13 @@ public class SetupUnitsCallbackHandler extends AbstractCallbackHandler {
 
     ChatService chatService;
     OrderService orderService;
+    InteractionService interactionService;
 
-    public SetupUnitsCallbackHandler(ResponseService responseService, ChatService chatService, OrderService orderService) {
-        super(responseService, chatService);
+    public SetupUnitsCallbackHandler(ChatService chatService, OrderService orderService, InteractionService interactionService) {
+        super(chatService);
         this.chatService = chatService;
         this.orderService = orderService;
+        this.interactionService = interactionService;
     }
 
     @Override
@@ -44,12 +45,12 @@ public class SetupUnitsCallbackHandler extends AbstractCallbackHandler {
         Screen screen = switch (button) {
             case SETUP_UNITS_IMPERIAL,
                     SETUP_UNITS_METRIC -> {
-                chat.getRequestProperties().setUnits(MeasurementUnits.from(button.getText()));
+                chat.getRequestPreferences().setUnits(button.getMeasurementUnits());
                 chatService.save(chat);
                 yield orderService.nextScreen(CURRENT_SCREEN);
             }
             case SETUP_UNITS_BACK -> orderService.prevScreen(CURRENT_SCREEN);
         };
-        respond(chat.getId(), callbackQuery.message().messageId(), screen);
+        interactionService.showResponse(chat, callbackQuery.message().messageId(), screen);
     }
 }

@@ -2,35 +2,38 @@ package com.belogrudovw.cookingbot.domain;
 
 import com.belogrudovw.cookingbot.domain.screen.Screen;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Queue;
 
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
+import org.apache.commons.collections4.queue.CircularFifoQueue;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Chat {
     long id;
+    // TODO: 17/01/2024 Replace RecipeObjects by RecipeId 
+    Queue<Recipe> history;
     Recipe currentRecipe;
     int cookingProgress;
-    List<Recipe> history;
-    RequestProperties requestProperties;
+    RequestPreferences requestPreferences;
     Screen pivotScreen;
     boolean isAwaitCustomQuery;
     String additionalQuery;
 
     public Chat(long id) {
         this.id = id;
-        this.history = new ArrayList<>();
-        this.requestProperties = RequestProperties.builder().build();
+        this.history = new CircularFifoQueue<>(42);
+        this.requestPreferences = RequestPreferences.builder().build();
         this.cookingProgress = 0;
     }
 
-    // TODO: 16/12/2023 Replace by queue
     public void addLastRecipeToHistory() {
-        if (!history.contains(currentRecipe)) {
+        if (history.contains(currentRecipe)) {
+            history.remove(currentRecipe);
+            history.add(currentRecipe);
+        } else {
             history.add(currentRecipe);
         }
     }

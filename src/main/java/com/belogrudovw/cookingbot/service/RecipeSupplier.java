@@ -1,7 +1,7 @@
 package com.belogrudovw.cookingbot.service;
 
 import com.belogrudovw.cookingbot.domain.Recipe;
-import com.belogrudovw.cookingbot.domain.RequestProperties;
+import com.belogrudovw.cookingbot.domain.RequestPreferences;
 import com.belogrudovw.cookingbot.domain.displayable.Languages;
 import com.belogrudovw.cookingbot.domain.displayable.Lightness;
 import com.belogrudovw.cookingbot.domain.displayable.MeasurementUnits;
@@ -14,7 +14,7 @@ import reactor.core.publisher.Mono;
 
 public interface RecipeSupplier {
     // TODO: 14/01/2024 Replace RequestProperties by Map
-    Mono<Recipe> get(RequestProperties request, String additionalQuery);
+    Mono<Recipe> get(RequestPreferences request, String additionalQuery);
 
     default Recipe getStubRecipe() {
         return STUB_RECIPE;

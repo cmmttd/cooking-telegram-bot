@@ -28,7 +28,7 @@ public class ChatExceptionsHandler {
     @ExceptionHandler(IllegalChatStateException.class)
     public boolean handleIllegalChatStateException(IllegalChatStateException ex) {
         log.error(ex.getMessage(), ex);
-        defaultHandler.handle(ex.getChatId());
+        defaultHandler.handle(ex.getChat());
         return true;
     }
 

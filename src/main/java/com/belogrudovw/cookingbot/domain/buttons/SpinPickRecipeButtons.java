@@ -1,25 +1,24 @@
 package com.belogrudovw.cookingbot.domain.buttons;
 
-import com.belogrudovw.cookingbot.domain.displayable.Displayable;
-import com.belogrudovw.cookingbot.domain.displayable.Navigational;
+import com.belogrudovw.cookingbot.lexic.StringToken;
 
 import lombok.Getter;
+
+import static com.belogrudovw.cookingbot.lexic.SingleValueTokens.BACK_TOKEN;
+import static com.belogrudovw.cookingbot.lexic.SingleValueTokens.SPIN_TOKEN;
+import static com.belogrudovw.cookingbot.lexic.SingleValueTokens.START_TOKEN;
 
 @Getter
 public enum SpinPickRecipeButtons implements CallbackButton {
 
-    SPIN_PICK_RECIPE_BACK(Navigational.BACK),
-    SPIN_PICK_RECIPE_SPIN("🔄"),
-    SPIN_PICK_RECIPE_START("▶️");
+    SPIN_PICK_RECIPE_BACK(BACK_TOKEN),
+    SPIN_PICK_RECIPE_SPIN(SPIN_TOKEN),
+    SPIN_PICK_RECIPE_START(START_TOKEN);
 
-    private final String text;
+    private final StringToken textToken;
 
-    SpinPickRecipeButtons(String string) {
-        this.text = string;
-    }
-
-    SpinPickRecipeButtons(Displayable displayable) {
-        this.text = displayable.getText();
+    SpinPickRecipeButtons(StringToken string) {
+        this.textToken = string;
     }
 
     @Override

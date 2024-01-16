@@ -61,8 +61,8 @@ public class RecipeServiceImpl implements RecipeService {
                 .filter(recipe -> !chat.getHistory().contains(recipe))
                 .filter(recipe -> chat.getCurrentRecipe() == null || !recipe.equals(chat.getCurrentRecipe()))
                 // TODO: 07/01/2024 Issue:#9 Replace lang filtering by requesting required lang from recipe
-                .filter(recipe -> chat.getRequestProperties().getLanguage() == recipe.getLanguage())
-                .filter(recipe -> chat.getRequestProperties().matchesTo(recipe.getProperties()))
+                .filter(recipe -> chat.getRequestPreferences().getLanguage() == recipe.getLanguage())
+                .filter(recipe -> chat.getRequestPreferences().matchesTo(recipe.getProperties()))
                 .findFirst()
                 .map(Mono::just)
                 .orElseGet(() -> requestNew(chat))
@@ -73,7 +73,7 @@ public class RecipeServiceImpl implements RecipeService {
     public Mono<Recipe> requestNew(Chat chat) {
         String additionalQuery = chat.isAwaitCustomQuery() && chat.getAdditionalQuery() != null ? chat.getAdditionalQuery() : "";
         log.info("New recipe requested for chat {} {}", chat.getId(), additionalQuery);
-        return recipeSupplier.get(chat.getRequestProperties(), additionalQuery);
+        return recipeSupplier.get(chat.getRequestPreferences(), additionalQuery);
     }
 
     @Override
