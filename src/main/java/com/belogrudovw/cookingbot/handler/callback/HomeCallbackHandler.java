@@ -64,7 +64,7 @@ public class HomeCallbackHandler extends AbstractCallbackHandler {
     public void handleCallback(Chat chat, UserAction.CallbackQuery callbackQuery) {
         RequestPreferences requestPreferences = chat.getRequestPreferences();
         if (requestPreferences.isEmpty()) {
-            String errorMessage = "Must have a non empty properties for step: %s. But properties there are: %s"
+            String errorMessage = "Must have a non empty preferences for step: %s. But properties there are: %s"
                     .formatted(CURRENT_SCREEN, requestPreferences);
             throw new IllegalChatStateException(chat, errorMessage);
         }
@@ -77,8 +77,9 @@ public class HomeCallbackHandler extends AbstractCallbackHandler {
                 chat.setAwaitCustomQuery(true);
                 interactionService.showResponse(chat, messageId, buildCustomQueryScreen());
             }
-            case HOME_RANDOM -> respondAsync(chat, messageId);
+            case HOME_RANDOM -> respondRandomAsync(chat, messageId);
             case HOME_HISTORY -> interactionService.showResponse(chat, messageId, buildHistoryScreen(chat));
+            case HOME_RESET_PREFERENCES -> interactionService.showResponse(chat, messageId, orderService.getDefault());
             case HOME_BACK -> interactionService.showResponse(chat, messageId, orderService.prevScreen(CURRENT_SCREEN));
         }
         chatService.save(chat);
@@ -94,7 +95,7 @@ public class HomeCallbackHandler extends AbstractCallbackHandler {
                 .build();
     }
 
-    private void respondAsync(Chat chat, int messageId) {
+    private void respondRandomAsync(Chat chat, int messageId) {
         Mono.fromRunnable(() -> interactionService.showSpinner(chat, messageId))
                 .then(recipeService.getRandom(chat)
                         .delaySubscription(Duration.ofMillis(500)))
