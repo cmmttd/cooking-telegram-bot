@@ -84,10 +84,8 @@ public class OpenAiClient implements RecipeSupplier {
         String additionalQueryReplacement = additionalQuery.isBlank()
                 ? ""
                 : "Also consider additional requirements from user: %s".formatted(additionalQuery);
-        String modelReplacement = Set.of(Languages.CH, Languages.JP, Languages.RU, Languages.FR, Languages.EN)
-                .contains(request.getLanguage()) ? models.wise() : models.cheap();
         return REQUEST_PATTERN
-                .replaceAll("\\$\\{model}", modelReplacement)
+                .replaceAll("\\$\\{model}", models.wise())
                 .replaceAll("\\$\\{language}", request.getLanguage().getLangName())
                 .replaceAll("\\$\\{lightness}", request.getLightness().name())
                 .replaceAll("\\$\\{units}", request.getUnits().name())
