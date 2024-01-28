@@ -4,14 +4,13 @@ import com.belogrudovw.cookingbot.domain.Chat;
 import com.belogrudovw.cookingbot.domain.Recipe;
 import com.belogrudovw.cookingbot.domain.screen.CustomScreen;
 import com.belogrudovw.cookingbot.domain.screen.DefaultScreens;
-import com.belogrudovw.cookingbot.domain.screen.Screen;
-import com.belogrudovw.cookingbot.domain.telegram.UserAction;
-import com.belogrudovw.cookingbot.error.RecipeNotFoundException;
+import com.belogrudovw.cookingbot.domain.telegram.CallbackQuery;
+import com.belogrudovw.cookingbot.exception.RecipeNotFoundException;
 import com.belogrudovw.cookingbot.lexic.SimpleStringToken;
 import com.belogrudovw.cookingbot.service.ChatService;
 import com.belogrudovw.cookingbot.service.InteractionService;
 import com.belogrudovw.cookingbot.service.OrderService;
-import com.belogrudovw.cookingbot.service.RecipeService;
+import com.belogrudovw.cookingbot.storage.Storage;
 
 import java.util.UUID;
 
@@ -30,15 +29,15 @@ public class PatternCallbackHandlerHistory extends AbstractPatternCallbackHandle
     static final String CALLBACK_PATTERN = HOME_HISTORY_CALLBACK_BASE + "\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}";
 
     ChatService chatService;
-    RecipeService recipeService;
+    Storage<UUID, Recipe> recipeStorage;
     OrderService orderService;
     InteractionService interactionService;
 
-    public PatternCallbackHandlerHistory(ChatService chatService, RecipeService recipeService, OrderService orderService,
-                                         InteractionService interactionService) {
-        super(chatService);
+    public PatternCallbackHandlerHistory(ChatService chatService, Storage<Long, Chat> chatStorage, Storage<UUID, Recipe> recipeStorage,
+                                         OrderService orderService, InteractionService interactionService) {
+        super(chatStorage);
         this.chatService = chatService;
-        this.recipeService = recipeService;
+        this.recipeStorage = recipeStorage;
         this.orderService = orderService;
         this.interactionService = interactionService;
     }
@@ -49,14 +48,14 @@ public class PatternCallbackHandlerHistory extends AbstractPatternCallbackHandle
     }
 
     @Override
-    public void handleCallback(Chat chat, UserAction.CallbackQuery callbackQuery) {
+    public void handleCallback(Chat chat, CallbackQuery callbackQuery) {
         // TODO: 20/12/2023 Wrap with try-catch
         String[] recipeIdString = callbackQuery.data().split(HOME_HISTORY_CALLBACK_BASE);
         UUID recipeId = UUID.fromString(recipeIdString[1]);
-        Recipe recipe = recipeService.findById(recipeId)
-                .orElseThrow(() -> new RecipeNotFoundException(chat, "Recipe not found for: %s".formatted(recipeId)));
+        Recipe recipe = recipeStorage.findById(recipeId)
+                .orElseThrow(() -> new RecipeNotFoundException(chat, "Recipe not found by id: %s".formatted(recipeId)));
         chatService.setNewRecipe(chat, recipe);
-        Screen screen = CustomScreen.builder()
+        CustomScreen screen = CustomScreen.builder()
                 .buttons(orderService.nextScreen(CURRENT_SCREEN).getButtons())
                 .textToken(new SimpleStringToken(recipe.toFormattedString(chat.getRequestPreferences().getLanguage())))
                 .build();

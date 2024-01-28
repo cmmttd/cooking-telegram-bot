@@ -1,13 +1,16 @@
 package com.belogrudovw.cookingbot.service.telegram;
 
+import com.belogrudovw.cookingbot.domain.Chat;
+import com.belogrudovw.cookingbot.domain.telegram.CallbackQuery;
+import com.belogrudovw.cookingbot.domain.telegram.Message;
 import com.belogrudovw.cookingbot.domain.telegram.UserAction;
 import com.belogrudovw.cookingbot.handler.Handler;
 import com.belogrudovw.cookingbot.handler.callback.CallbackHandler;
 import com.belogrudovw.cookingbot.handler.callback.PatternCallbackHandler;
 import com.belogrudovw.cookingbot.handler.message.MessageHandler;
 import com.belogrudovw.cookingbot.handler.message.PatternMessageHandler;
-import com.belogrudovw.cookingbot.service.ChatService;
 import com.belogrudovw.cookingbot.service.HandlerDispatcher;
+import com.belogrudovw.cookingbot.storage.Storage;
 
 import java.util.Map;
 import java.util.Optional;
@@ -26,7 +29,7 @@ import org.springframework.stereotype.Service;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class HandlerDispatcherTelegram implements HandlerDispatcher {
 
-    ChatService chatService;
+    Storage<Long, Chat> chatStorage;
     Handler defaultHandler;
     @Resource
     Map<String, CallbackHandler> callbackHandlersMap;
@@ -50,18 +53,18 @@ public class HandlerDispatcherTelegram implements HandlerDispatcher {
     public void dispatch(UserAction action) {
         String flattenedActionString = action.toString().replaceAll("\n", " ");
         log.debug("Action received: {}", flattenedActionString);
-        // TODO: 10/01/2024 wrap all handling by try catch and rethrow exception with user action
+        // TODO: 10/01/2024 Try to build flow with event subscriber
         Optional.<Handler>empty()
                 .or(() -> findMessageHandler(action))
                 .or(() -> findCallbackQueryHandler(action))
-                .filter(handler -> chatService.isExists(action.getChatId()))
+                .filter(handler -> chatStorage.contains(action.getChatId()))
                 .ifPresentOrElse(handler -> handler.handle(action),
                         () -> defaultHandler.handle(action));
     }
 
     private Optional<Handler> findMessageHandler(UserAction action) {
         Optional<String> messageText = action.message()
-                .map(UserAction.Message::text);
+                .map(Message::text);
         Optional<Handler> patternMessageHandler = messageText
                 .flatMap(text -> dynamicMessageHandlerMap.entrySet().stream()
                         .filter(pattern -> text.matches(pattern.getKey()))
@@ -75,7 +78,7 @@ public class HandlerDispatcherTelegram implements HandlerDispatcher {
 
     private Optional<Handler> findCallbackQueryHandler(UserAction action) {
         Optional<String> callbackData = action.callbackQuery()
-                .map(UserAction.CallbackQuery::data);
+                .map(CallbackQuery::data);
         Optional<Handler> callbackHandler = callbackData
                 .map(callbackHandlersMap::get);
         Optional<Handler> dynamicCallbackHandler = callbackData

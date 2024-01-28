@@ -1,4 +1,4 @@
-package com.belogrudovw.cookingbot.error;
+package com.belogrudovw.cookingbot.exception;
 
 import com.belogrudovw.cookingbot.handler.Handler;
 

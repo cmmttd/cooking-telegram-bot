@@ -11,8 +11,9 @@ public class OpenAiApiConfiguration {
 
     @Bean
     public WebClient openAiWebClient(OpenAiProperties properties) {
+        String url = properties.url().base() + properties.url().version() + properties.url().path();
         return WebClient.builder()
-                .baseUrl(properties.apiUrl())
+                .baseUrl(url)
                 .defaultHeader("Authorization", "Bearer " + properties.token())
                 .defaultHeader("Content-Type", "application/json")
                 .build();

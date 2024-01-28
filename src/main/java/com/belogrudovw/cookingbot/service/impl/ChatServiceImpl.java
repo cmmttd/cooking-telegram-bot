@@ -2,12 +2,11 @@ package com.belogrudovw.cookingbot.service.impl;
 
 import com.belogrudovw.cookingbot.domain.Chat;
 import com.belogrudovw.cookingbot.domain.Recipe;
-import com.belogrudovw.cookingbot.domain.screen.Screen;
+import com.belogrudovw.cookingbot.domain.screen.DefaultScreens;
+import com.belogrudovw.cookingbot.domain.telegram.UserAction;
 import com.belogrudovw.cookingbot.service.ChatService;
 import com.belogrudovw.cookingbot.service.OrderService;
 import com.belogrudovw.cookingbot.storage.Storage;
-
-import java.util.Optional;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -25,48 +24,21 @@ public class ChatServiceImpl implements ChatService {
     OrderService orderService;
 
     @Override
-    public boolean isExists(long chatId) {
-        return chatStorage.contains(chatId);
-    }
-
-    @Override
-    public Chat findById(long chatId) {
-        return chatStorage.get(chatId)
-                .orElseGet(() -> createNewChat(chatId));
-    }
-
-    @Override
-    public void save(Chat chat) {
-        chatStorage.save(chat);
-    }
-
-    @Override
     public void setNewRecipe(Chat chat, Recipe recipe) {
-        chat.setCurrentRecipe(recipe);
+        chat.setCurrentRecipe(recipe.getId());
         chat.setCookingProgress(0);
         chat.addLastRecipeToHistory();
         chatStorage.save(chat);
     }
 
-    private Chat createNewChat(long chatId) {
-        Chat newChat = new Chat(chatId);
-        Screen firstScreen = orderService.getDefault();
+    @Override
+    public Chat createNewChat(UserAction action) {
+        long chatId = action.getChatId();
+        Chat newChat = new Chat(chatId, action.getUserName());
+        DefaultScreens firstScreen = orderService.getDefault();
         newChat.setPivotScreen(firstScreen);
         chatStorage.save(newChat);
-        log.info("New user saved: {}", chatId);
+        log.info("New user created with id: {}", chatId);
         return newChat;
-    }
-
-    @Override
-    public Optional<Recipe.Step> incrementProgressAndGetStep(Chat chat) {
-        Recipe recipe = chat.getCurrentRecipe();
-        int cookingProgress = chat.getCookingProgress();
-        if (recipe.getSteps().size() > cookingProgress) {
-            Recipe.Step nextStep = recipe.getSteps().get(cookingProgress);
-            chat.setCookingProgress(cookingProgress + 1);
-            chatStorage.save(chat);
-            return Optional.of(nextStep);
-        }
-        return Optional.empty();
     }
 }

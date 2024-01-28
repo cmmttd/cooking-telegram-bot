@@ -1,12 +1,12 @@
 package com.belogrudovw.cookingbot.service;
 
-import com.belogrudovw.cookingbot.domain.screen.Screen;
+import com.belogrudovw.cookingbot.domain.screen.DefaultScreens;
 
 public interface OrderService {
 
-    Screen prevScreen(Screen currentScreen);
+    DefaultScreens prevScreen(DefaultScreens currentScreen);
 
-    Screen nextScreen(Screen currentScreen);
+    DefaultScreens nextScreen(DefaultScreens currentScreen);
 
-    Screen getDefault();
+    DefaultScreens getDefault();
 }

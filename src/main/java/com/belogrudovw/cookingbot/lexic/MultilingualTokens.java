@@ -13,7 +13,7 @@ public enum MultilingualTokens implements StringToken {
             "Choisissez la langue"),
     CHOOSE_MEASUREMENTS_TOKEN("Measurements unit format", "Выберите систему единиц измерений", "Maßeinheiten auswählen", "选择测量单位",
             "Виберіть одиниці вимірів", "Sélectionnez les unités de mesure"),
-    CHOOSE_LIGHTNESS_TOKEN("Lightness of the desired dish", "Выберите тяжесть желаемого блюда",
+    CHOOSE_LIGHTNESS_TOKEN("Lightness of the desired dish (calories)", "Выберите относительную тяжесть (каллораж)",
             "Wählen Sie den Schweregrad des gewünschten Gerichts", "选择所需菜肴的严重程度", "Виберіть тягар бажаної страви",
             "Sélectionnez la sévérité du plat souhaité"),
     CHOOSE_DIFFICULTIES_TOKEN("How long do you plan to cook?", "Как много времени у вас есть на готовку?",
@@ -63,7 +63,17 @@ public enum MultilingualTokens implements StringToken {
     REQUEST_RESET_PREFERENCES_TOKEN("Reset preferences", "Сбросить настройки", "Einstellungen zurücksetzen", "重置偏好设置",
             "Скинути налаштування", "Réinitialiser les options"),
     ADDITIONAL_PARAMETERS_TOKEN(", you also asked for: ", ", а ещё вы попросили: ", ", Sie haben auch nach Folgendem gefragt: ",
-            "，您还要求： ", ", ви також просили: ", ", vous avez également demandé: ");
+            "，您还要求： ", ", ви також просили: ", ", vous avez également demandé: "),
+    SHOW_CALORIC_TOKEN("Caloric intake", "Сколько калорий", "Kalorienaufnahme", "热量摄入", "Калорійність",
+            "Apport calorique"),
+    SHOW_IMAGE_TOKEN("Generate image", "Сгенерировать картинку", "Bild erzeugen", "生成图片", "Згенерувати картинку",
+            "Générer une image"),
+    CONTACT_SUPPORT_TOKEN("Something went wrong, please contact the developers from the bot description",
+            "Что-то пошло не так, пожалуйста обратитесь к разработчикам из описания бота",
+            "Es ist ein Fehler aufgetreten. Bitte wenden Sie sich über die Bot-Beschreibung an die Entwickler",
+            "出现问题，请通过机器人描述联系开发人员", "Щось пішло не так, зверніться до розробників з опису бота",
+            "Quelque chose s'est mal passé, veuillez contacter les développeurs à partir de la description du bot"),
+    ;
 
     private final EnumMap<Languages, String> tokens;
 

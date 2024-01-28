@@ -1,0 +1,59 @@
+{
+  "id": "108c6415-3ea2-4b1d-aa1d-1a396f6461b2",
+  "title": "Classic Ukrainian Borscht",
+  "properties": {
+    "lightness": "MODERATE",
+    "units": "METRIC",
+    "cooking_time": 120
+  },
+  "short_description": "A hearty, moderately caloric soup rooted in Ukrainian tradition, packed with vegetables and supported by a savory meat stock.",
+  "ingredients": [
+    "300g beef",
+    "1.5L water",
+    "2 medium beets, peeled and grated",
+    "2 medium potatoes, cubed",
+    "1 carrot, grated",
+    "1/2 head of small cabbage, thinly sliced",
+    "1 onion, chopped",
+    "3 cloves garlic, minced",
+    "2 tomatoes, peeled and chopped",
+    "3 tbsp tomato paste",
+    "1/2 tsp sugar",
+    "Salt and black pepper, to taste",
+    "2 bay leaves",
+    "3-4 tbsp vegetable oil",
+    "1 tbsp vinegar",
+    "1 tsp dried parsley",
+    "1 tsp dried dill",
+    "Sour cream, for serving",
+    "Fresh dill, for garnish"
+  ],
+  "steps": [
+    {
+      "index": 1,
+      "offset": 0,
+      "title": "Preparing the Meat Stock",
+      "description": "In a large pot, combine the beef with water and bring to a boil. Reduce heat to a simmer, removing foam and fat as they rise. Cover and cook for approx. 60 minutes until the beef is tender."
+    },
+    {
+      "index": 2,
+      "offset": 60,
+      "title": "Cooking the Vegetables",
+      "description": "Add the cubed potatoes to the broth and cook for 5 minutes. Meanwhile, heat the vegetable oil in a pan, add and sauté beets with vinegar, sugar, tomato paste, and a half cup of broth from the pot. After sautéing for about 7 minutes, entirely incorporate the sautéed beets, along with the carrots, onion, cabbage, and fresh tomatoes into the pot."
+    },
+    {
+      "index": 3,
+      "offset": 80,
+      "title": "Final Simmer and Seasoning",
+      "description": "Toss bay leaves, garlic, parsley, and dill into the pot. Bring the borscht to a boil and put the gas on low. Simmer for another 30 minutes. Season with black pepper, and additional salt if required."
+    },
+    {
+      "index": 4,
+      "offset": 110,
+      "title": "Serving the Borscht",
+      "description": "Serve hot with a spoonful of sour cream and a garnish of fresh dill in each bowl. Enjoy this national dish of Ukraine with rye bread."
+    }
+  ],
+  "image_url": null,
+  "language": "EN"
+}

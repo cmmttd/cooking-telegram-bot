@@ -7,7 +7,7 @@ import com.belogrudovw.cookingbot.domain.buttons.HomeButtons;
 import com.belogrudovw.cookingbot.domain.buttons.LanguageButtons;
 import com.belogrudovw.cookingbot.domain.buttons.LightnessButtons;
 import com.belogrudovw.cookingbot.domain.buttons.MeasurementUnitButtons;
-import com.belogrudovw.cookingbot.domain.buttons.SpinPickRecipeButtons;
+import com.belogrudovw.cookingbot.domain.buttons.RecipeButtons;
 import com.belogrudovw.cookingbot.domain.buttons.SuccessButtons;
 import com.belogrudovw.cookingbot.lexic.MultilingualTokens;
 import com.belogrudovw.cookingbot.lexic.SingleValueTokens;
@@ -26,7 +26,7 @@ public enum DefaultScreens implements Screen {
     SETUP_LIGHTNESS(LightnessButtons.values(), MultilingualTokens.CHOOSE_LIGHTNESS_TOKEN),
     SETUP_DIFFICULTIES(DifficultyButtons.values(), MultilingualTokens.CHOOSE_DIFFICULTIES_TOKEN),
     HOME(HomeButtons.values(), MultilingualTokens.HOW_TO_COOK_TOKEN),
-    SPIN_PICK_RECIPE(SpinPickRecipeButtons.values(), SingleValueTokens.EMPTY_TOKEN),
+    SPIN_PICK_RECIPE(RecipeButtons.values(), SingleValueTokens.EMPTY_TOKEN),
     COOKING(CookingButtons.values(), SingleValueTokens.EMPTY_TOKEN),
     SUCCESS(SuccessButtons.values(), MultilingualTokens.CONGRATULATIONS_TOKEN);
 

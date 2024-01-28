@@ -1,1 +1,59 @@
-{"id":"d60213a1-94ae-434a-ae52-46f3bd391153","title":"Kartoffelsalat","properties":{"lightness":"HEAVY","units":"METRIC","cooking_time":120},"short_description":"Ein leckerer Kartoffelsalat, der perfekt als Beilage zum Grillen passt. Frisch und herzhaft zugleich!","ingredients":["1 kg Kartoffeln","200 g Speck","1 Zwiebel","4 Esslöffel Essig","5 Esslöffel Gemüsebrühe","2 Teelöffel Senf","Salz und Pfeffer nach Geschmack","Petersilie zur Dekoration"],"steps":[{"index":1,"offset":0,"title":"Kartoffeln kochen","description":"Die Kartoffeln schälen, in Salzwasser kochen und anschließend in Scheiben schneiden."},{"index":2,"offset":25,"title":"Speck braten","description":"Den Speck in einer Pfanne knusprig braten und anschließend die Zwiebel darin glasig dünsten."},{"index":3,"offset":40,"title":"Dressing anrühren","description":"Essig, Gemüsebrühe, Senf, Salz und Pfeffer zu einem Dressing verrühren."},{"index":4,"offset":50,"title":"Alles vermischen","description":"Die gebratenen Speck-Zwiebel-Mischung und das Dressing über die Kartoffeln geben und vorsichtig vermengen."},{"index":5,"offset":60,"title":"Ziehen lassen","description":"Den Kartoffelsalat für ca. 1 Stunde ziehen lassen, damit er gut durchzieht und sein volles Aroma entfalten kann."},{"index":6,"offset":120,"title":"Servieren","description":"Mit frischer Petersilie bestreuen und als leckere Beilage servieren."}],"language":"DE"}
+{
+  "id": "d60213a1-94ae-434a-ae52-46f3bd391153",
+  "title": "Kartoffelsalat",
+  "properties": {
+    "lightness": "HEAVY",
+    "units": "METRIC",
+    "cooking_time": 120
+  },
+  "short_description": "Ein leckerer Kartoffelsalat, der perfekt als Beilage zum Grillen passt. Frisch und herzhaft zugleich!",
+  "ingredients": [
+    "1 kg Kartoffeln",
+    "200 g Speck",
+    "1 Zwiebel",
+    "4 Esslöffel Essig",
+    "5 Esslöffel Gemüsebrühe",
+    "2 Teelöffel Senf",
+    "Salz und Pfeffer nach Geschmack",
+    "Petersilie zur Dekoration"
+  ],
+  "steps": [
+    {
+      "index": 1,
+      "offset": 0,
+      "title": "Kartoffeln kochen",
+      "description": "Die Kartoffeln schälen, in Salzwasser kochen und anschließend in Scheiben schneiden."
+    },
+    {
+      "index": 2,
+      "offset": 25,
+      "title": "Speck braten",
+      "description": "Den Speck in einer Pfanne knusprig braten und anschließend die Zwiebel darin glasig dünsten."
+    },
+    {
+      "index": 3,
+      "offset": 40,
+      "title": "Dressing anrühren",
+      "description": "Essig, Gemüsebrühe, Senf, Salz und Pfeffer zu einem Dressing verrühren."
+    },
+    {
+      "index": 4,
+      "offset": 50,
+      "title": "Alles vermischen",
+      "description": "Die gebratenen Speck-Zwiebel-Mischung und das Dressing über die Kartoffeln geben und vorsichtig vermengen."
+    },
+    {
+      "index": 5,
+      "offset": 60,
+      "title": "Ziehen lassen",
+      "description": "Den Kartoffelsalat für ca. 1 Stunde ziehen lassen, damit er gut durchzieht und sein volles Aroma entfalten kann."
+    },
+    {
+      "index": 6,
+      "offset": 120,
+      "title": "Servieren",
+      "description": "Mit frischer Petersilie bestreuen und als leckere Beilage servieren."
+    }
+  ],
+  "language": "DE"
+}
