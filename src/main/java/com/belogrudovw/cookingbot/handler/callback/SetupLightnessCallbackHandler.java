@@ -4,10 +4,10 @@ import com.belogrudovw.cookingbot.domain.Chat;
 import com.belogrudovw.cookingbot.domain.buttons.LightnessButtons;
 import com.belogrudovw.cookingbot.domain.screen.DefaultScreens;
 import com.belogrudovw.cookingbot.domain.screen.Screen;
-import com.belogrudovw.cookingbot.domain.telegram.UserAction;
-import com.belogrudovw.cookingbot.service.ChatService;
+import com.belogrudovw.cookingbot.domain.telegram.CallbackQuery;
 import com.belogrudovw.cookingbot.service.InteractionService;
 import com.belogrudovw.cookingbot.service.OrderService;
+import com.belogrudovw.cookingbot.storage.Storage;
 
 import java.util.Set;
 
@@ -21,15 +21,16 @@ import org.springframework.stereotype.Component;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class SetupLightnessCallbackHandler extends AbstractCallbackHandler {
 
-    static final Screen CURRENT_SCREEN = DefaultScreens.SETUP_LIGHTNESS;
+    static final DefaultScreens CURRENT_SCREEN = DefaultScreens.SETUP_LIGHTNESS;
 
-    ChatService chatService;
+    Storage<Long, Chat> chatStorage;
     OrderService orderService;
     InteractionService interactionService;
 
-    public SetupLightnessCallbackHandler(ChatService chatService, OrderService orderService, InteractionService interactionService) {
-        super(chatService);
-        this.chatService = chatService;
+    public SetupLightnessCallbackHandler(Storage<Long, Chat> chatStorage, OrderService orderService,
+                                         InteractionService interactionService) {
+        super(chatStorage);
+        this.chatStorage = chatStorage;
         this.orderService = orderService;
         this.interactionService = interactionService;
     }
@@ -40,7 +41,7 @@ public class SetupLightnessCallbackHandler extends AbstractCallbackHandler {
     }
 
     @Override
-    public void handleCallback(Chat chat, UserAction.CallbackQuery callbackQuery) {
+    public void handleCallback(Chat chat, CallbackQuery callbackQuery) {
         var button = LightnessButtons.valueOf(callbackQuery.data());
         Screen screen = switch (button) {
             case SETUP_LIGHTNESS_LIGHT,
@@ -48,7 +49,7 @@ public class SetupLightnessCallbackHandler extends AbstractCallbackHandler {
                     SETUP_LIGHTNESS_HEAVY,
                     SETUP_LIGHTNESS_ANY -> {
                 chat.getRequestPreferences().setLightness(button.getLightness());
-                chatService.save(chat);
+                chatStorage.save(chat);
                 yield orderService.nextScreen(CURRENT_SCREEN);
             }
             case SETUP_LIGHTNESS_BACK -> orderService.prevScreen(CURRENT_SCREEN);

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <appender name="FILE-ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOGS_PATH}/cooking-bot.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>logs/archived/cooking-bot.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <totalSizeCap>20GB</totalSizeCap>
+            <maxHistory>60</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>
+                %d %p %c{1} [%t] %m%n
+            </pattern>
+        </encoder>
+    </appender>
+
+    <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="FILE-ROLLING"/>
+    </appender>
+
+    <springProfile name="default">
+        <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+        <logger name="com.belogrudovw.cookingbot" level="DEBUG"/>
+        <root level="WARN">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="debug">
+        <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+        <logger name="com.belogrudovw.cookingbot" level="DEBUG"/>
+        <logger name="org.springframework.web" level="TRACE"/>
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="prod">
+        <logger name="com.belogrudovw.cookingbot" level="INFO"/>
+        <root level="WARN">
+            <appender-ref ref="ASYNC"/>
+        </root>
+    </springProfile>
+
+</configuration>

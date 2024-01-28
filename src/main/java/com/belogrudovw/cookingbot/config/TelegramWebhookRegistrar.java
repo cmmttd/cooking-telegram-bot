@@ -4,6 +4,7 @@ import com.belogrudovw.cookingbot.util.CustomUriBuilder;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -57,6 +58,7 @@ public class TelegramWebhookRegistrar {
     }
 
     private void logSuccess(String ignored) {
-        log.info("Telegram webhook successfully registered: {}", properties.webhookUrl() + properties.bot().path());
+        String actualWebhookPath = properties.webhookUrl() + properties.bot().path();
+        log.info("Telegram webhook for {} successfully registered: {}", properties.bot().name(), actualWebhookPath);
     }
 }

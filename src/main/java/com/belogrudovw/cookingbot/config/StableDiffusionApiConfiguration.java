@@ -7,15 +7,15 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 @Slf4j
 @Configuration
-public class OpenAiApiConfiguration {
+public class StableDiffusionApiConfiguration {
 
     @Bean
-    public WebClient openAiWebClient(OpenAiProperties properties) {
-        String url = properties.url().base() + properties.url().version() + properties.url().path();
+    public WebClient sdWebClient(StableDiffusionProperties properties) {
         return WebClient.builder()
-                .baseUrl(url)
+                .baseUrl(properties.apiUrl())
                 .defaultHeader("Authorization", "Bearer " + properties.token())
                 .defaultHeader("Content-Type", "application/json")
+                .defaultHeader("Accept", "image/png")
                 .build();
     }
 }

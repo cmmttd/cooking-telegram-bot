@@ -1,27 +1,55 @@
 package com.belogrudovw.cookingbot.storage;
 
 import com.belogrudovw.cookingbot.domain.Recipe;
+import com.belogrudovw.cookingbot.util.FilesUtil;
+import com.belogrudovw.cookingbot.util.Pair;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
-import jakarta.validation.Valid;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.validation.annotation.Validated;
 
 @Slf4j
 @Component
-@Validated
 public class RecipeStorageInMemory implements Storage<UUID, Recipe> {
 
     private final Map<UUID, Recipe> recipes = new ConcurrentHashMap<>();
 
+    @Value("${recovery.default-recipes-path}")
+    private String defaultRecipeFolderPath;
+
+    @PostConstruct
+    void recover() {
+        if (defaultRecipeFolderPath != null) {
+            log.info("Recipe recovery starts from the folder: {}", defaultRecipeFolderPath);
+            FilesUtil.recover(defaultRecipeFolderPath, Recipe.class, this::save);
+            log.info("Recipe recovery completed successfully for: {}", size());
+        }
+    }
+
+    @PreDestroy
+    void backup() {
+        if (defaultRecipeFolderPath != null) {
+            log.info("Recipe data backup starts from the folder: {}", defaultRecipeFolderPath);
+            var recipeStream = recipes.entrySet().stream()
+                    .map(entry -> new Pair<>(String.valueOf(entry.getKey()), entry.getValue()));
+            FilesUtil.backup(defaultRecipeFolderPath, recipeStream);
+            log.info("Recipe data backup completed successfully for: {}", size());
+        }
+    }
+
     @Override
-    public void save(@Valid Recipe recipe) {
+    public void save(Recipe recipe) {
         if (recipe.getId() == null) {
             recipe.setId(UUID.randomUUID());
         }
@@ -29,8 +57,16 @@ public class RecipeStorageInMemory implements Storage<UUID, Recipe> {
     }
 
     @Override
-    public Optional<Recipe> get(UUID id) {
+    public Optional<Recipe> findById(UUID id) {
         return Optional.ofNullable(recipes.get(id));
+    }
+
+    @Override
+    public List<Recipe> findByIds(Collection<UUID> ids) {
+        return ids.stream()
+                .map(recipes::get)
+                .filter(Objects::nonNull)
+                .toList();
     }
 
     @Override
@@ -41,5 +77,10 @@ public class RecipeStorageInMemory implements Storage<UUID, Recipe> {
     @Override
     public Stream<Recipe> all() {
         return recipes.values().stream();
+    }
+
+    @Override
+    public int size() {
+        return recipes.size();
     }
 }

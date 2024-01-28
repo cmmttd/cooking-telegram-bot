@@ -13,7 +13,7 @@ public enum MultilingualTokens implements StringToken {
             "Choisissez la langue"),
     CHOOSE_MEASUREMENTS_TOKEN("Measurements unit format", "Выберите систему единиц измерений", "Maßeinheiten auswählen", "选择测量单位",
             "Виберіть одиниці вимірів", "Sélectionnez les unités de mesure"),
-    CHOOSE_LIGHTNESS_TOKEN("Lightness of the desired dish", "Выберите тяжесть желаемого блюда",
+    CHOOSE_LIGHTNESS_TOKEN("Lightness of the desired dish (calories)", "Выберите относительную тяжесть (каллораж)",
             "Wählen Sie den Schweregrad des gewünschten Gerichts", "选择所需菜肴的严重程度", "Виберіть тягар бажаної страви",
             "Sélectionnez la sévérité du plat souhaité"),
     CHOOSE_DIFFICULTIES_TOKEN("How long do you plan to cook?", "Как много времени у вас есть на готовку?",
@@ -63,7 +63,23 @@ public enum MultilingualTokens implements StringToken {
     REQUEST_RESET_PREFERENCES_TOKEN("Reset preferences", "Сбросить настройки", "Einstellungen zurücksetzen", "重置偏好设置",
             "Скинути налаштування", "Réinitialiser les options"),
     ADDITIONAL_PARAMETERS_TOKEN(", you also asked for: ", ", а ещё вы попросили: ", ", Sie haben auch nach Folgendem gefragt: ",
-            "，您还要求： ", ", ви також просили: ", ", vous avez également demandé: ");
+            "，您还要求： ", ", ви також просили: ", ", vous avez également demandé: "),
+    SHOW_CALORIC_TOKEN("Caloric intake", "Сколько калорий", "Kalorienaufnahme", "热量摄入", "Калорійність",
+            "Apport calorique"),
+    SHOW_IMAGE_TOKEN("Generate image", "Сгенерировать картинку", "Bild erzeugen", "生成图片", "Згенерувати картинку",
+            "Générer une image"),
+    CONTACT_SUPPORT_TOKEN("Unfortunately, I was unable to generate a recipe for you. Please try again and if the problem persists, "
+            + "write about it to support from the bot description.",
+            "К сожалению, я не смог сгенерировать рецепт для Вас. Пожалуйста попробуйте ещё раз и, если проблема повторится,"
+                    + " то напишите об этом в поддержку из описания бота.",
+            "Leider konnte ich kein Rezept für Sie generieren. Bitte versuchen Sie es erneut. Wenn das Problem weiterhin besteht,"
+                    + " schreiben Sie dem Support anhand der Bot-Beschreibung darüber.",
+            "不幸的是，我无法为你生成食谱。 请重试，如果问题仍然存在，请通过机器人描述将其写下来以提供支持。",
+            "На жаль, я не зміг створити рецепт для Вас. Будь ласка, спробуйте ще раз і, якщо проблема повториться, "
+                    + "то напишіть про це на підтримку опису бота.",
+            "Malheureusement, je n'ai pas pu vous générer une recette. Veuillez réessayer et si le problème persiste, "
+                    + "écrivez-en au support à partir de la description du bot."),
+    ;
 
     private final EnumMap<Languages, String> tokens;
 

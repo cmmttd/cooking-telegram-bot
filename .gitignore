@@ -5,6 +5,8 @@ target/
 !**/src/test/**/target/
 mvnw
 mvnw.cmd
+**/chats/*
+**/default_recipes/*
 
 ### STS ###
 .apt_generated

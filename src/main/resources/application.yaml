@@ -1,21 +1,30 @@
 server:
   port: 8083
 spring:
+  data:
+    mongodb:
+      host: ${MONGODB_HOST}
+      port: ${MONGODB_PORT:27017}
+      username: ${MONGODB_USER}
+      password: ${MONGODB_PASSWORD}
+      database: cooking-bot
   jackson:
     default-property-inclusion: non_null
     property-naming-strategy: com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy
-logging:
-  level:
-    root: ERROR
-    com.belogrudovw.cookingbot: info
+recovery:
+  default-recipes-path: ${RECOVERY_RECIPES_PATH}
+  chats-path: ${RECOVERY_CHATS_PATH}
 open-ai:
-  api-url: https://api.openai.com/v1/chat/completions
+  url:
+    base: https://api.openai.com
+    version: /v1
+    path: /chat/completions
   token: ${OPENAI_TOKEN}
   conversation:
     models:
       cheap: gpt-3.5-turbo-1106
       wise: gpt-4-1106-preview
-    temperature: 1
+    temperature: 1.25
     max-tokens: 4000
 telegram:
   api-url: https://api.telegram.org/bot
@@ -24,26 +33,18 @@ telegram:
     token: ${COOKING_BOT_TOKEN}
     name: ${COOKING_BOT_NAME}
     path: /webhook/
+stable-diffusion:
+  api-url: https://api.stability.ai/v1/generation/stable-diffusion-v1-6/
+  token: ${STABILITY_TOKEN}
+
 ---
 spring:
   config:
     activate:
-      on-profile: test
-logging:
-  level:
-    com:
-      belogrudovw:
-        cookingbot: debug
+      on-profile: prod
+
 ---
 spring:
   config:
     activate:
       on-profile: debug
-logging:
-  level:
-    com:
-      belogrudovw:
-        cookingbot: debug
-    org:
-      springframework:
-        web: trace

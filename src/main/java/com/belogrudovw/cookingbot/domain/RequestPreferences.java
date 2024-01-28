@@ -5,6 +5,7 @@ import com.belogrudovw.cookingbot.domain.displayable.Languages;
 import com.belogrudovw.cookingbot.domain.displayable.Lightness;
 import com.belogrudovw.cookingbot.domain.displayable.MeasurementUnits;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,6 +18,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public final class RequestPreferences {
     Languages language;

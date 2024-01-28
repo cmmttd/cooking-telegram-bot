@@ -1,27 +1,21 @@
 package com.belogrudovw.cookingbot.service.impl;
 
-import com.belogrudovw.cookingbot.domain.screen.Screen;
+import com.belogrudovw.cookingbot.domain.screen.DefaultScreens;
 import com.belogrudovw.cookingbot.service.OrderService;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
-import static com.belogrudovw.cookingbot.domain.screen.DefaultScreens.COOKING;
-import static com.belogrudovw.cookingbot.domain.screen.DefaultScreens.HOME;
-import static com.belogrudovw.cookingbot.domain.screen.DefaultScreens.SETUP_DIFFICULTIES;
-import static com.belogrudovw.cookingbot.domain.screen.DefaultScreens.SETUP_LANG;
-import static com.belogrudovw.cookingbot.domain.screen.DefaultScreens.SETUP_LIGHTNESS;
-import static com.belogrudovw.cookingbot.domain.screen.DefaultScreens.SETUP_UNITS;
-import static com.belogrudovw.cookingbot.domain.screen.DefaultScreens.SPIN_PICK_RECIPE;
+import static com.belogrudovw.cookingbot.domain.screen.DefaultScreens.*;
 
 @Service
 public class OrderServiceEnumBased implements OrderService {
-    private static final Map<Screen, LinkedScreen> order;
+    private static final Map<DefaultScreens, LinkedScreen> order;
 
     static {
-        order = new HashMap<>();
+        order = new EnumMap<>(DefaultScreens.class);
         order.put(SETUP_LANG, new LinkedScreen(SETUP_LANG, SETUP_UNITS));
         order.put(SETUP_UNITS, new LinkedScreen(SETUP_LANG, SETUP_LIGHTNESS));
         order.put(SETUP_LIGHTNESS, new LinkedScreen(SETUP_UNITS, SETUP_DIFFICULTIES));
@@ -32,20 +26,20 @@ public class OrderServiceEnumBased implements OrderService {
     }
 
     @Override
-    public Screen prevScreen(Screen currentScreen) {
+    public DefaultScreens prevScreen(DefaultScreens currentScreen) {
         return order.get(currentScreen).prev();
     }
 
     @Override
-    public Screen nextScreen(Screen currentScreen) {
+    public DefaultScreens nextScreen(DefaultScreens currentScreen) {
         return order.get(currentScreen).next();
     }
 
     @Override
-    public Screen getDefault() {
+    public DefaultScreens getDefault() {
         return SETUP_LANG;
     }
 
-    private record LinkedScreen(Screen prev, Screen next) {
+    private record LinkedScreen(DefaultScreens prev, DefaultScreens next) {
     }
 }
