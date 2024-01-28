@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+  cooking-bot:
+    container_name: cooking-bot
+    image: cmmttd/cooking-bot-arm:latest
+    ports:
+      - 8083:8083
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - COOKING_BOT_NAME=${COOKING_BOT_NAME}
+      - COOKING_BOT_TOKEN=${COOKING_BOT_TOKEN}
+      - OPENAI_TOKEN=${OPENAI_TOKEN}
+      - WEBHOOK_URL=${WEBHOOK_URL}
+      - RECOVERY_CHATS_PATH=/usr/app/data/chats/
+      - RECOVERY_RECIPES_PATH=/usr/app/data/default_recipes/
+      - LOGS_PATH=/usr/app/data/logs/
+    volumes:
+      - /home/home/dev/data/cooking-bot/:/usr/app/data/

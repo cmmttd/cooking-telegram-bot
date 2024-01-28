@@ -4,10 +4,10 @@ import com.belogrudovw.cookingbot.domain.Chat;
 import com.belogrudovw.cookingbot.domain.buttons.LanguageButtons;
 import com.belogrudovw.cookingbot.domain.screen.DefaultScreens;
 import com.belogrudovw.cookingbot.domain.screen.Screen;
-import com.belogrudovw.cookingbot.domain.telegram.UserAction;
-import com.belogrudovw.cookingbot.service.ChatService;
+import com.belogrudovw.cookingbot.domain.telegram.CallbackQuery;
 import com.belogrudovw.cookingbot.service.InteractionService;
 import com.belogrudovw.cookingbot.service.OrderService;
+import com.belogrudovw.cookingbot.storage.Storage;
 
 import java.util.Set;
 
@@ -23,13 +23,13 @@ public class SetupLangCallbackHandler extends AbstractCallbackHandler {
 
     static final DefaultScreens CURRENT_SCREEN = DefaultScreens.SETUP_LANG;
 
-    ChatService chatService;
+    Storage<Long, Chat> chatStorage;
     OrderService orderService;
     InteractionService interactionService;
 
-    public SetupLangCallbackHandler(ChatService chatService, OrderService orderService, InteractionService interactionService) {
-        super(chatService);
-        this.chatService = chatService;
+    public SetupLangCallbackHandler(Storage<Long, Chat> chatStorage, OrderService orderService, InteractionService interactionService) {
+        super(chatStorage);
+        this.chatStorage = chatStorage;
         this.orderService = orderService;
         this.interactionService = interactionService;
     }
@@ -40,10 +40,10 @@ public class SetupLangCallbackHandler extends AbstractCallbackHandler {
     }
 
     @Override
-    public void handleCallback(Chat chat, UserAction.CallbackQuery callbackQuery) {
+    public void handleCallback(Chat chat, CallbackQuery callbackQuery) {
         LanguageButtons langButton = LanguageButtons.valueOf(callbackQuery.data());
         chat.getRequestPreferences().setLanguage(langButton.getLanguage());
-        chatService.save(chat);
+        chatStorage.save(chat);
         Screen screen = orderService.nextScreen(CURRENT_SCREEN);
         interactionService.showResponse(chat, callbackQuery.message().messageId(), screen);
     }

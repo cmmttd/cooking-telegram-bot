@@ -4,12 +4,14 @@ import com.belogrudovw.cookingbot.domain.Chat;
 import com.belogrudovw.cookingbot.domain.Recipe;
 import com.belogrudovw.cookingbot.domain.screen.CustomScreen;
 import com.belogrudovw.cookingbot.domain.screen.DefaultScreens;
+import com.belogrudovw.cookingbot.domain.telegram.Message;
 import com.belogrudovw.cookingbot.domain.telegram.UserAction;
 import com.belogrudovw.cookingbot.handler.DefaultHandler;
 import com.belogrudovw.cookingbot.lexic.SimpleStringToken;
 import com.belogrudovw.cookingbot.service.ChatService;
 import com.belogrudovw.cookingbot.service.InteractionService;
 import com.belogrudovw.cookingbot.service.RecipeService;
+import com.belogrudovw.cookingbot.storage.Storage;
 
 import java.time.Duration;
 
@@ -32,6 +34,7 @@ public class PatternMessageHandlerCustomQuery implements PatternMessageHandler {
 
     DefaultHandler defaultHandler;
     ChatService chatService;
+    Storage<Long, Chat> chatStorage;
     RecipeService recipeService;
     InteractionService interactionService;
 
@@ -43,19 +46,22 @@ public class PatternMessageHandlerCustomQuery implements PatternMessageHandler {
     @Override
     public void handle(UserAction action) {
         String text = action.message()
-                .map(UserAction.Message::text)
+                .map(Message::text)
                 .orElseThrow();
         log.info("Route '{}' to {} for user: {}", text, this.getClass().getSimpleName(), action.getUserName());
         long chatId = action.getChatId();
-        Chat chat = chatService.findById(chatId);
-        if (chat.isAwaitCustomQuery()) {
-            chat.setAdditionalQuery(text);
-            respondAsync(chat);
-        } else {
-            log.warn("User {} tried custom query typing, but on wrong state", action.getUserName());
-            defaultHandler.handle(chat);
-        }
-        chatService.save(chat);
+        chatStorage.findById(chatId)
+                .map(chat -> {
+                    if (chat.isAwaitCustomQuery()) {
+                        chat.setAdditionalQuery(text);
+                        respondAsync(chat);
+                    } else {
+                        log.warn("User {} tried custom query typing, but on wrong state", action.getUserName());
+                        defaultHandler.handle(chat);
+                    }
+                    return chat;
+                })
+                .ifPresent(chatStorage::save);
     }
 
     private void respondAsync(Chat chat) {

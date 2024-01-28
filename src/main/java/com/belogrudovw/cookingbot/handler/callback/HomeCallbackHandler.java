@@ -9,18 +9,20 @@ import com.belogrudovw.cookingbot.domain.buttons.HomeButtons;
 import com.belogrudovw.cookingbot.domain.screen.CustomScreen;
 import com.belogrudovw.cookingbot.domain.screen.DefaultScreens;
 import com.belogrudovw.cookingbot.domain.screen.Screen;
-import com.belogrudovw.cookingbot.domain.telegram.UserAction;
-import com.belogrudovw.cookingbot.error.IllegalChatStateException;
+import com.belogrudovw.cookingbot.domain.telegram.CallbackQuery;
+import com.belogrudovw.cookingbot.exception.IllegalChatStateException;
 import com.belogrudovw.cookingbot.lexic.SimpleStringToken;
 import com.belogrudovw.cookingbot.service.ChatService;
 import com.belogrudovw.cookingbot.service.InteractionService;
 import com.belogrudovw.cookingbot.service.OrderService;
 import com.belogrudovw.cookingbot.service.RecipeService;
+import com.belogrudovw.cookingbot.storage.Storage;
 
 import java.time.Duration;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import lombok.AccessLevel;
@@ -39,19 +41,24 @@ import static com.belogrudovw.cookingbot.lexic.SingleValueTokens.BACK_TOKEN;
 public class HomeCallbackHandler extends AbstractCallbackHandler {
 
     public static final String HOME_HISTORY_CALLBACK_BASE = DefaultScreens.HOME.name() + "_";
-    static final Screen CURRENT_SCREEN = DefaultScreens.HOME;
+    static final DefaultScreens CURRENT_SCREEN = DefaultScreens.HOME;
 
     ChatService chatService;
+    Storage<Long, Chat> chatStorage;
+    Storage<UUID, Recipe> recipeStorage;
     OrderService orderService;
     RecipeService recipeService;
     InteractionService interactionService;
 
-    public HomeCallbackHandler(ChatService chatService, OrderService orderService, RecipeService recipeService,
-                               InteractionService interactionService) {
-        super(chatService);
+    // TODO: 29/01/2024 Get rid of overcomplexity
+    public HomeCallbackHandler(ChatService chatService, Storage<Long, Chat> chatStorage, OrderService orderService,
+                               RecipeService recipeService, Storage<UUID, Recipe> recipeStorage, InteractionService interactionService) {
+        super(chatStorage);
         this.chatService = chatService;
+        this.chatStorage = chatStorage;
         this.orderService = orderService;
         this.recipeService = recipeService;
+        this.recipeStorage = recipeStorage;
         this.interactionService = interactionService;
     }
 
@@ -61,7 +68,7 @@ public class HomeCallbackHandler extends AbstractCallbackHandler {
     }
 
     @Override
-    public void handleCallback(Chat chat, UserAction.CallbackQuery callbackQuery) {
+    public void handleCallback(Chat chat, CallbackQuery callbackQuery) {
         RequestPreferences requestPreferences = chat.getRequestPreferences();
         if (requestPreferences.isEmpty()) {
             String errorMessage = "Must have a non empty preferences for step: %s. But properties there are: %s"
@@ -82,7 +89,7 @@ public class HomeCallbackHandler extends AbstractCallbackHandler {
             case HOME_RESET_PREFERENCES -> interactionService.showResponse(chat, messageId, orderService.getDefault());
             case HOME_BACK -> interactionService.showResponse(chat, messageId, orderService.prevScreen(CURRENT_SCREEN));
         }
-        chatService.save(chat);
+        chatStorage.save(chat);
     }
 
     private CustomScreen buildCustomQueryScreen() {
@@ -113,19 +120,17 @@ public class HomeCallbackHandler extends AbstractCallbackHandler {
     }
 
     private CustomScreen buildHistoryScreen(Chat chat) {
-        List<CallbackButton> buttons = buildButtons(chat.getHistory().stream());
-        orderService.nextScreen(CURRENT_SCREEN).getButtons().stream()
-                .filter(button -> button.getTextToken().equals(BACK_TOKEN))
-                .findFirst()
-                .ifPresent(buttons::add);
+        var backButton = orderService.nextScreen(CURRENT_SCREEN).getButtons().stream()
+                .filter(button -> button.getTextToken().equals(BACK_TOKEN));
+        var buttons = Stream.concat(buildButtons(chat.getHistory()), backButton).toList();
         return CustomScreen.builder()
                 .textToken(PICK_HISTORY_TOKEN)
                 .buttons(buttons)
                 .build();
     }
 
-    private static List<CallbackButton> buildButtons(Stream<Recipe> recipeStream) {
-        return recipeStream
+    private Stream<CallbackButton> buildButtons(Collection<UUID> recipeIds) {
+        return recipeStorage.findByIds(recipeIds).stream()
                 .map(recipe -> {
                     String text = recipe.getTitle() + " - " + recipe.getProperties().cookingTime();
                     return CustomCallbackButton.builder()
@@ -133,6 +138,6 @@ public class HomeCallbackHandler extends AbstractCallbackHandler {
                             .callbackData(HOME_HISTORY_CALLBACK_BASE + recipe.getId())
                             .build();
                 })
-                .collect(Collectors.toList());
+                .map(CallbackButton.class::cast);
     }
 }

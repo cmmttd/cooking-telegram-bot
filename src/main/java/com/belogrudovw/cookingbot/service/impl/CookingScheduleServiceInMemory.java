@@ -4,18 +4,16 @@ import com.belogrudovw.cookingbot.domain.Chat;
 import com.belogrudovw.cookingbot.domain.Recipe;
 import com.belogrudovw.cookingbot.domain.screen.CustomScreen;
 import com.belogrudovw.cookingbot.domain.screen.DefaultScreens;
-import com.belogrudovw.cookingbot.error.RecipeNotFoundException;
+import com.belogrudovw.cookingbot.exception.RecipeNotFoundException;
 import com.belogrudovw.cookingbot.lexic.SimpleStringToken;
-import com.belogrudovw.cookingbot.service.ChatService;
 import com.belogrudovw.cookingbot.service.CookingScheduleService;
 import com.belogrudovw.cookingbot.service.InteractionService;
-import com.belogrudovw.cookingbot.service.RecipeService;
+import com.belogrudovw.cookingbot.storage.Storage;
 
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -43,8 +41,8 @@ public class CookingScheduleServiceInMemory implements CookingScheduleService {
     ConcurrentNavigableMap<Long, Map<Long, RecipeStepTask>> tasksTimeline = new ConcurrentSkipListMap<>();
     Map<Long, Set<Long>> timestampsByChatId = new ConcurrentHashMap<>();
 
-    ChatService chatService;
-    RecipeService recipeService;
+    Storage<Long, Chat> chatStorage;
+    Storage<UUID, Recipe> recipeStorage;
     InteractionService interactionService;
 
     // TODO: 29/12/2023 Issue#18 Rethink all approach for delayed tasks execution
@@ -52,26 +50,28 @@ public class CookingScheduleServiceInMemory implements CookingScheduleService {
     @Override
     public void scheduleNexStep(Chat chat) {
         cancelSchedule(chat);
-        UUID recipeId = chat.getCurrentRecipe().getId();
+        UUID recipeId = chat.getCurrentRecipe();
         long chatId = chat.getId();
         timestampsByChatId.put(chatId, new HashSet<>());
-        List<Recipe.Step> steps = chat.getCurrentRecipe().getSteps();
         int cookingProgress = chat.getCookingProgress();
-        if (cookingProgress < steps.size()) {
-            long prevStepOffset = cookingProgress > 0 ? steps.get(cookingProgress - 1).offset() : 0;
-            long baseOffset = TimeUnit.MINUTES.toMillis(prevStepOffset);
+        recipeStorage.findById(recipeId)
+                .map(Recipe::getSteps)
+                .filter(steps -> cookingProgress < steps.size())
+                .ifPresent(steps -> {
+                    long prevStepOffset = cookingProgress > 0 ? steps.get(cookingProgress - 1).offset() : 0;
+                    long baseOffset = TimeUnit.MINUTES.toMillis(prevStepOffset);
 //            long baseOffset = TimeUnit.MINUTES.toMillis(prevStepOffset) / 100;
-            long nowMillis = System.currentTimeMillis() - baseOffset;
-            for (int i = cookingProgress; i < steps.size(); i++) {
-                Recipe.Step step = steps.get(i);
-                long nextStepOffsetMillis = TimeUnit.MINUTES.toMillis(step.offset());
+                    long nowMillis = System.currentTimeMillis() - baseOffset;
+                    for (int i = cookingProgress; i < steps.size(); i++) {
+                        Recipe.Step step = steps.get(i);
+                        long nextStepOffsetMillis = TimeUnit.MINUTES.toMillis(step.offset());
 //                long nextStepOffsetMillis = TimeUnit.MINUTES.toMillis(step.offset()) / 100;
-                long taskStartTime = nowMillis + nextStepOffsetMillis;
-                tasksTimeline.putIfAbsent(taskStartTime, new HashMap<>());
-                tasksTimeline.get(taskStartTime).put(chatId, new RecipeStepTask(recipeId, i));
-                timestampsByChatId.get(chatId).add(taskStartTime);
-            }
-        }
+                        long taskStartTime = nowMillis + nextStepOffsetMillis;
+                        tasksTimeline.putIfAbsent(taskStartTime, new HashMap<>());
+                        tasksTimeline.get(taskStartTime).put(chatId, new RecipeStepTask(recipeId, i));
+                        timestampsByChatId.get(chatId).add(taskStartTime);
+                    }
+                });
     }
 
     @Override
@@ -102,33 +102,38 @@ public class CookingScheduleServiceInMemory implements CookingScheduleService {
         }
         Map<Long, UUID> completedTaskMap = new HashMap<>();
         expiredTasks.forEach((timestamp, tasks) -> {
-            tasks.forEach((chatId, task) -> {
-                Chat chat = chatService.findById(chatId);
-                sendNextStepMessage(chat, task);
-                updateCookingProgress(chatId, task);
-                removeTimestamp(chatId, timestamp);
-                completedTaskMap.put(chatId, task.recipeId());
-            });
+            tasks.forEach((chatId, task) -> chatStorage.findById(chatId)
+                    .ifPresent(chat -> {
+                        sendNextRecipeStep(chat, task);
+                        updateCookingProgress(chatId, task);
+                        removeTimestamp(chatId, timestamp);
+                        completedTaskMap.put(chatId, task.recipeId());
+                    }));
             tasksTimeline.remove(timestamp);
         });
         completedTaskMap.forEach(this::sendCompleteMessage);
     }
 
-    private void sendNextStepMessage(Chat chat, RecipeStepTask task) {
-        Recipe recipe = recipeService.findById(task.recipeId())
-                .orElseThrow(() -> new RecipeNotFoundException(chat, "Recipe not found for: %s".formatted(task.recipeId())));
-        Recipe.Step step = recipe.getSteps().get(task.stepCount());
-        CustomScreen customScreen = CustomScreen.builder()
-                .buttons(COOKING.getButtons())
-                .textToken(new SimpleStringToken(step.toString()))
-                .build();
-        interactionService.showResponse(chat, customScreen);
+    private void sendNextRecipeStep(Chat chat, RecipeStepTask task) {
+        recipeStorage.findById(task.recipeId())
+                .map(recipe -> recipe.getSteps().get(task.stepCount()))
+                .map(step -> CustomScreen.builder()
+                        .buttons(COOKING.getButtons())
+                        .textToken(new SimpleStringToken(step.toString()))
+                        .build())
+                .ifPresentOrElse(screen -> interactionService.showResponse(chat, screen),
+                        () -> {
+                            throw new RecipeNotFoundException(chat, "Recipe not found for: %s".formatted(task.recipeId()));
+                        });
     }
 
     private void updateCookingProgress(long chatId, RecipeStepTask task) {
-        Chat chat = chatService.findById(chatId);
-        chat.setCookingProgress(task.stepCount() + 1);
-        chatService.save(chat);
+        chatStorage.findById(chatId)
+                .map(chat -> {
+                    chat.setCookingProgress(task.stepCount() + 1);
+                    return chat;
+                })
+                .ifPresent(chatStorage::save);
     }
 
     private void removeTimestamp(long chatId, long timestamp) {
@@ -140,7 +145,8 @@ public class CookingScheduleServiceInMemory implements CookingScheduleService {
         if (timestampsByChatId.get(chatId).isEmpty()) {
             log.info("User from chat {} has been finished the recipe: {}", chatId, recipeId);
             timestampsByChatId.remove(chatId);
-            interactionService.showResponse(chatService.findById(chatId), DefaultScreens.SUCCESS);
+            chatStorage.findById(chatId)
+                    .ifPresent(chat -> interactionService.showResponse(chat, DefaultScreens.SUCCESS));
         }
     }
 

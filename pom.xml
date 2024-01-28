@@ -20,6 +20,7 @@
     </properties>
 
     <dependencies>
+        <!-- Basic -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
@@ -35,12 +36,6 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-resolver-dns-native-macos</artifactId>
-            <version>4.1.101.Final</version>
-            <classifier>osx-aarch_64</classifier>
-        </dependency>
-        <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jdk8</artifactId>
         </dependency>
@@ -48,6 +43,14 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
             <version>4.4</version>
+        </dependency>
+
+        <!-- OS depends -->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-resolver-dns-native-macos</artifactId>
+            <version>4.1.101.Final</version>
+            <classifier>osx-aarch_64</classifier>
         </dependency>
 
         <!-- Tests -->

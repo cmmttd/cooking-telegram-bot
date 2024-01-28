@@ -7,26 +7,25 @@ import com.belogrudovw.cookingbot.domain.displayable.Lightness;
 import com.belogrudovw.cookingbot.domain.displayable.MeasurementUnits;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.UUID;
 
 import reactor.core.publisher.Mono;
+
+import static com.belogrudovw.cookingbot.lexic.MultilingualTokens.CONTACT_SUPPORT_TOKEN;
 
 public interface RecipeSupplier {
     // TODO: 14/01/2024 Replace RequestProperties by Map
     Mono<Recipe> get(RequestPreferences request, String additionalQuery);
 
-    default Recipe getStubRecipe() {
-        return STUB_RECIPE;
+    default Recipe getStubRecipe(Languages lang) {
+        return Recipe.builder()
+                .id(UUID.randomUUID())
+                .title("Stub recipe")
+                .shortDescription(CONTACT_SUPPORT_TOKEN.in(lang))
+                .language(lang)
+                .ingredients(Collections.emptyList())
+                .properties(new Recipe.RecipeProperties(Lightness.LIGHT, MeasurementUnits.METRIC, 15))
+                .steps(Collections.emptyList())
+                .build();
     }
-
-    Recipe STUB_RECIPE = Recipe.builder()
-            .id(UUID.randomUUID())
-            .title("Stub recipe")
-            .shortDescription("Something goes wrong. Please notify my author - @belogrudovw")
-            .language(Languages.EN)
-            .ingredients(Collections.emptyList())
-            .properties(new Recipe.RecipeProperties(Lightness.LIGHT, MeasurementUnits.METRIC, 15))
-            .steps(List.of(new Recipe.Step(0, 0, "Please contact support:", "@belogrudovw")))
-            .build();
 }
