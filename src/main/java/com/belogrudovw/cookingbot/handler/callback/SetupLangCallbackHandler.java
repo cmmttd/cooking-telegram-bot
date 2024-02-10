@@ -23,13 +23,11 @@ public class SetupLangCallbackHandler extends AbstractCallbackHandler {
 
     static final DefaultScreens CURRENT_SCREEN = DefaultScreens.SETUP_LANG;
 
-    Storage<Long, Chat> chatStorage;
     OrderService orderService;
     InteractionService interactionService;
 
     public SetupLangCallbackHandler(Storage<Long, Chat> chatStorage, OrderService orderService, InteractionService interactionService) {
         super(chatStorage);
-        this.chatStorage = chatStorage;
         this.orderService = orderService;
         this.interactionService = interactionService;
     }
@@ -43,7 +41,6 @@ public class SetupLangCallbackHandler extends AbstractCallbackHandler {
     public void handleCallback(Chat chat, CallbackQuery callbackQuery) {
         LanguageButtons langButton = LanguageButtons.valueOf(callbackQuery.data());
         chat.getRequestPreferences().setLanguage(langButton.getLanguage());
-        chatStorage.save(chat);
         Screen screen = orderService.nextScreen(CURRENT_SCREEN);
         interactionService.showResponse(chat, callbackQuery.message().messageId(), screen);
     }

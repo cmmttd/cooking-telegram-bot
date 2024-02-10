@@ -7,11 +7,15 @@ spring:
       port: ${MONGODB_PORT:27017}
       username: ${MONGODB_USER}
       password: ${MONGODB_PASSWORD}
-      database: cooking-bot
+      database: cooking_bot
+      authentication-database: admin
   jackson:
     default-property-inclusion: non_null
     property-naming-strategy: com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy
+storage:
+  source: ${STORAGE_SOURCE:in-memory}
 recovery:
+  is-needed: ${RECOVERY_IS_NEEDED:false}
   default-recipes-path: ${RECOVERY_RECIPES_PATH}
   chats-path: ${RECOVERY_CHATS_PATH}
 open-ai:

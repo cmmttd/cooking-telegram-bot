@@ -73,7 +73,7 @@ public class OpenAiClient implements RecipeSupplier {
                 && current.getSteps().size() == recipe.getSteps().size();
         return recipeStorage.all()
                 .parallel()
-                .anyMatch(comparisonPredicate);
+                .noneMatch(comparisonPredicate);
     }
 
     private Mono<Recipe> apiCall(String requestBody) {

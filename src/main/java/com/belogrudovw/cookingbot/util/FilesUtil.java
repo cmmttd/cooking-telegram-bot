@@ -47,7 +47,8 @@ public final class FilesUtil {
     }
 
     // TODO: 28/01/2024 Remove crappy recovery
-    public static <T> void recover(String folderUri, Class<T> clazz, Consumer<T> consumer) {
+    public static <T> int recover(String folderUri, Class<T> clazz, Consumer<T> consumer) {
+        int counter = 0;
         Path rootPath = Paths.get(folderUri);
         try {
             if (Files.notExists(rootPath)) {
@@ -64,9 +65,11 @@ public final class FilesUtil {
                         String readString = Files.readString(path);
                         var parsedObject = objectMapper.readValue(readString, clazz);
                         consumer.accept(parsedObject);
+                        counter++;
                     }
                 }
             }
+            return counter;
         } catch (IOException e) {
             throw new RuntimeException("Failed to recover from " + folderUri, e);
         }

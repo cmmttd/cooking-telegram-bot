@@ -27,6 +27,7 @@ public abstract class AbstractCallbackHandler implements CallbackHandler {
                     String userIdentification = chat.getId() + " - " + chat.getUsername();
                     log.info("Route {} to {} for user: {}", callbackQuery.data(), this.getClass().getSimpleName(), userIdentification);
                     handleCallback(chat, callbackQuery);
+                    chatStorage.save(chat);
                 });
     }
 }
