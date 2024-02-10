@@ -23,14 +23,12 @@ public class SetupLightnessCallbackHandler extends AbstractCallbackHandler {
 
     static final DefaultScreens CURRENT_SCREEN = DefaultScreens.SETUP_LIGHTNESS;
 
-    Storage<Long, Chat> chatStorage;
     OrderService orderService;
     InteractionService interactionService;
 
     public SetupLightnessCallbackHandler(Storage<Long, Chat> chatStorage, OrderService orderService,
                                          InteractionService interactionService) {
         super(chatStorage);
-        this.chatStorage = chatStorage;
         this.orderService = orderService;
         this.interactionService = interactionService;
     }
@@ -49,7 +47,6 @@ public class SetupLightnessCallbackHandler extends AbstractCallbackHandler {
                     SETUP_LIGHTNESS_HEAVY,
                     SETUP_LIGHTNESS_ANY -> {
                 chat.getRequestPreferences().setLightness(button.getLightness());
-                chatStorage.save(chat);
                 yield orderService.nextScreen(CURRENT_SCREEN);
             }
             case SETUP_LIGHTNESS_BACK -> orderService.prevScreen(CURRENT_SCREEN);

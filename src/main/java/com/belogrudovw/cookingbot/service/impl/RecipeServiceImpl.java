@@ -23,23 +23,25 @@ import reactor.core.publisher.Mono;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RecipeServiceImpl implements RecipeService {
 
-    final Storage<UUID, Recipe> recipeStorage;
-    final RecipeSupplier recipeSupplier;
+    Storage<UUID, Recipe> recipeStorage;
+    RecipeSupplier recipeSupplier;
 
     @Override
     public Mono<Recipe> getRandom(Chat chat) {
-        log.debug("Random recipe requested for chat {} - {}", chat.getId(), chat.getAdditionalQuery());
         Stream<Recipe> recipeStream = recipeStorage.all().parallel();
         if (chat.isAwaitCustomQuery()) {
+            log.debug("Random recipe requested for chat {} - {}", chat.getId(), chat.getAdditionalQuery());
             // TODO: 14/01/2024 Add full-body text search by additional request
             recipeStream = recipeStream.filter(recipe -> {
                 String additionalQuery = chat.getAdditionalQuery().toLowerCase(Locale.ROOT);
                 return recipe.getShortDescription().toLowerCase(Locale.ROOT).contains(additionalQuery)
                         || recipe.getTitle().toLowerCase(Locale.ROOT).contains(additionalQuery);
             });
+        } else {
+            log.debug("Random recipe requested for chat {}", chat.getId());
         }
         Set<Recipe> recipeSet = recipeStream
                 .filter(recipe -> !chat.getHistory().contains(recipe.getId()))
@@ -53,7 +55,12 @@ public class RecipeServiceImpl implements RecipeService {
                 .findAny()
                 .map(Mono::just)
                 .orElseGet(() -> {
-                    log.warn("Existing recipe hasn't found for chat {} - {}", chat.getId(), chat.getAdditionalQuery());
+                    // TODO: 10/02/2024 Consider well-looking logging
+                    if (chat.isAwaitCustomQuery()) {
+                        log.warn("Existing recipe hasn't found for chat {} - {}", chat.getId(), chat.getAdditionalQuery());
+                    } else {
+                        log.warn("Existing recipe hasn't found for chat {}", chat.getId());
+                    }
                     return requestNew(chat);
                 })
                 .doOnSuccess(recipe -> log.debug("Random recipe '{}' for chat {}", recipe.getTitle(), chat.getId()));

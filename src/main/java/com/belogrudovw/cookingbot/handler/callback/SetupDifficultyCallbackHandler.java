@@ -23,14 +23,12 @@ public class SetupDifficultyCallbackHandler extends AbstractCallbackHandler {
 
     static final DefaultScreens CURRENT_SCREEN = DefaultScreens.SETUP_DIFFICULTIES;
 
-    Storage<Long, Chat> chatStorage;
     OrderService orderService;
     InteractionService interactionService;
 
     public SetupDifficultyCallbackHandler(Storage<Long, Chat> chatStorage, OrderService orderService,
                                           InteractionService interactionService) {
         super(chatStorage);
-        this.chatStorage = chatStorage;
         this.orderService = orderService;
         this.interactionService = interactionService;
     }
@@ -49,7 +47,6 @@ public class SetupDifficultyCallbackHandler extends AbstractCallbackHandler {
                     SETUP_DIFFICULTY_60,
                     SETUP_DIFFICULTY_INFINITY -> {
                 chat.getRequestPreferences().setDifficulty(button.getDifficulties());
-                chatStorage.save(chat);
                 yield orderService.nextScreen(CURRENT_SCREEN);
             }
             case SETUP_DIFFICULTY_BACK -> orderService.prevScreen(CURRENT_SCREEN);

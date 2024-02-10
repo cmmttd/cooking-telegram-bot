@@ -21,6 +21,7 @@ import com.belogrudovw.cookingbot.storage.Storage;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -120,17 +121,20 @@ public class HomeCallbackHandler extends AbstractCallbackHandler {
     }
 
     private CustomScreen buildHistoryScreen(Chat chat) {
+        var buttons = buildButtons(chat.getHistory());
         var backButton = orderService.nextScreen(CURRENT_SCREEN).getButtons().stream()
                 .filter(button -> button.getTextToken().equals(BACK_TOKEN));
-        var buttons = Stream.concat(buildButtons(chat.getHistory()), backButton).toList();
         return CustomScreen.builder()
                 .textToken(PICK_HISTORY_TOKEN)
-                .buttons(buttons)
+                .buttons(Stream.concat(buttons, backButton).toList())
                 .build();
     }
 
     private Stream<CallbackButton> buildButtons(Collection<UUID> recipeIds) {
-        return recipeStorage.findByIds(recipeIds).stream()
+        return recipeIds.stream()
+                .map(recipeStorage::findById)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .map(recipe -> {
                     String text = recipe.getTitle() + " - " + recipe.getProperties().cookingTime();
                     return CustomCallbackButton.builder()

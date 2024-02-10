@@ -23,13 +23,11 @@ public class SetupUnitsCallbackHandler extends AbstractCallbackHandler {
 
     static final DefaultScreens CURRENT_SCREEN = DefaultScreens.SETUP_UNITS;
 
-    Storage<Long, Chat> chatStorage;
     OrderService orderService;
     InteractionService interactionService;
 
     public SetupUnitsCallbackHandler(Storage<Long, Chat> chatStorage, OrderService orderService, InteractionService interactionService) {
         super(chatStorage);
-        this.chatStorage = chatStorage;
         this.orderService = orderService;
         this.interactionService = interactionService;
     }
@@ -46,7 +44,6 @@ public class SetupUnitsCallbackHandler extends AbstractCallbackHandler {
             case SETUP_UNITS_IMPERIAL,
                     SETUP_UNITS_METRIC -> {
                 chat.getRequestPreferences().setUnits(button.getMeasurementUnits());
-                chatStorage.save(chat);
                 yield orderService.nextScreen(CURRENT_SCREEN);
             }
             case SETUP_UNITS_BACK -> orderService.prevScreen(CURRENT_SCREEN);

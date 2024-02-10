@@ -67,7 +67,6 @@ public class CookingCallbackHandler extends AbstractCallbackHandler {
             case COOKING_PAUSE -> cookingScheduleService.cancelSchedule(chat);
             case COOKING_CANCEL -> respondCancel(chat);
         }
-        chatStorage.save(chat);
     }
 
     private void respondNextAsync(Chat chat, UUID currentRecipeId) {

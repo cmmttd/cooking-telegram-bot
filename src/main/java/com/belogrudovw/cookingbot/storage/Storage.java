@@ -20,5 +20,5 @@ public interface Storage<K, V> {
 
     Stream<V> all();
 
-    int size();
+    long size();
 }

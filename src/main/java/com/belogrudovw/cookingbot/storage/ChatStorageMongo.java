@@ -3,16 +3,12 @@ package com.belogrudovw.cookingbot.storage;
 import com.belogrudovw.cookingbot.config.RecoveryProperties;
 import com.belogrudovw.cookingbot.domain.Chat;
 import com.belogrudovw.cookingbot.util.FilesUtil;
-import com.belogrudovw.cookingbot.util.Pair;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -23,12 +19,12 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-@ConditionalOnProperty(prefix = "storage", name = "source", havingValue = "in-memory")
+@ConditionalOnProperty(prefix = "storage", name = "source", havingValue = "mongo")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
-public class ChatStorageInMemory implements Storage<Long, Chat> {
+public class ChatStorageMongo implements Storage<Long, Chat> {
 
-    Map<Long, Chat> chats = new ConcurrentHashMap<>();
+    ChatRepositoryMongo chatRepositoryMongo;
     RecoveryProperties recoveryProperties;
 
     @PostConstruct
@@ -40,47 +36,33 @@ public class ChatStorageInMemory implements Storage<Long, Chat> {
         }
     }
 
-    @PreDestroy
-    void backup() {
-        if (recoveryProperties.isNeeded() && recoveryProperties.chatsPath() != null) {
-            log.info("Chat data backup starts from the folder: {}", recoveryProperties.chatsPath());
-            var chatStream = chats.entrySet().stream()
-                    .map(entry -> new Pair<>(String.valueOf(entry.getKey()), entry.getValue()));
-            FilesUtil.backupForce(recoveryProperties.chatsPath(), chatStream);
-            log.info("Chat data backup completed successfully for: {}", size());
-        }
-    }
-
     @Override
     public void save(Chat chat) {
-        chats.put(chat.getId(), chat);
+        chatRepositoryMongo.save(chat);
     }
 
     @Override
-    public Optional<Chat> findById(Long chatId) {
-        return Optional.ofNullable(chats.get(chatId));
+    public Optional<Chat> findById(Long id) {
+        return chatRepositoryMongo.findById(id);
     }
 
     @Override
     public List<Chat> findByIds(Collection<Long> ids) {
-        return chats.entrySet().stream()
-                .filter(e -> ids.contains(e.getKey()))
-                .map(Map.Entry::getValue)
-                .toList();
+        return chatRepositoryMongo.findAllById(ids);
     }
 
     @Override
     public boolean contains(Long id) {
-        return chats.containsKey(id);
+        return chatRepositoryMongo.existsById(id);
     }
 
     @Override
     public Stream<Chat> all() {
-        return chats.values().stream();
+        return chatRepositoryMongo.findAll().stream();
     }
 
     @Override
     public long size() {
-        return chats.size();
+        return chatRepositoryMongo.count();
     }
 }
