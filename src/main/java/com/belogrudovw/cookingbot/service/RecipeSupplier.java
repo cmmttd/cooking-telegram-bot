@@ -15,7 +15,7 @@ import static com.belogrudovw.cookingbot.lexic.MultilingualTokens.CONTACT_SUPPOR
 
 public interface RecipeSupplier {
     // TODO: 14/01/2024 Replace RequestProperties by Map
-    Mono<Recipe> get(RequestPreferences request, String additionalQuery);
+    Mono<Recipe> getRecipe(RequestPreferences request, String additionalQuery);
 
     default Recipe getStubRecipe(Languages lang) {
         return Recipe.builder()

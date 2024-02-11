@@ -3,6 +3,7 @@ package com.belogrudovw.cookingbot.service.impl;
 import com.belogrudovw.cookingbot.domain.Chat;
 import com.belogrudovw.cookingbot.domain.Recipe;
 import com.belogrudovw.cookingbot.domain.screen.DefaultScreens;
+import com.belogrudovw.cookingbot.domain.telegram.Message;
 import com.belogrudovw.cookingbot.domain.telegram.UserAction;
 import com.belogrudovw.cookingbot.service.ChatService;
 import com.belogrudovw.cookingbot.service.OrderService;
@@ -28,17 +29,27 @@ public class ChatServiceImpl implements ChatService {
         chat.setCurrentRecipe(recipe.getId());
         chat.setCookingProgress(0);
         chat.addLastRecipeToHistory();
+        chat.getImageProgress().set(0);
         chatStorage.save(chat);
     }
 
     @Override
-    public Chat createNewChat(UserAction action) {
-        long chatId = action.getChatId();
+    public Chat createNewChat(long chatId, UserAction action) {
         Chat newChat = new Chat(chatId, action.getUserName());
         DefaultScreens firstScreen = orderService.getDefault();
         newChat.setPivotScreen(firstScreen);
+        setIfUserBot(chatId, action, newChat);
+        action.message()
+                .map(Message::messageId)
+                .ifPresent(id -> newChat.getLastUsedMessageId().set(id));
         chatStorage.save(newChat);
         log.info("New user created with id: {}", chatId);
         return newChat;
+    }
+
+    private static void setIfUserBot(long chatId, UserAction action, Chat newChat) {
+        if (chatId < 0) {
+            newChat.setUsername(action.toString());
+        }
     }
 }

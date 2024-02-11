@@ -30,7 +30,7 @@ public class DefaultHandler implements Handler {
         log.info("Default handler called for: {}", action.toString().replaceAll("\n", ""));
         long chatId = action.getChatId();
         Chat chat = chatStorage.findById(chatId)
-                .orElseGet(() -> chatService.createNewChat(action));
+                .orElseGet(() -> chatService.createNewChat(chatId, action));
         if (chat.getRequestPreferences().getLanguage() == null) {
             Languages language = action.message()
                     .map(Message::from)

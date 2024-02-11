@@ -5,6 +5,7 @@ import com.belogrudovw.cookingbot.domain.displayable.Lightness;
 import com.belogrudovw.cookingbot.domain.displayable.MeasurementUnits;
 import com.belogrudovw.cookingbot.lexic.MultilingualTokens;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -35,6 +36,9 @@ public final class Recipe {
     String title;
     @NotNull
     RecipeProperties properties;
+    // TODO: 13/02/2024 #46 - Add recipe translation to all availiable languages
+    @NotNull
+    Languages language;
     @NotNull
     @NotEmpty
     String shortDescription;
@@ -42,10 +46,10 @@ public final class Recipe {
     List<String> ingredients;
     @NotNull
     List<Step> steps;
-
-    // TODO: 07/01/2024 Replace single lang by multy-lang string
-    @NotNull
-    Languages language;
+    // TODO: 17/02/2024 Replace to linked list with 'getNext' access
+    List<String> imageIds = new ArrayList<>();
+    // FIXME: 13/02/2024 Remove when #46 complete
+    String engText;
 
     public String toFormattedString(Languages language) {
         String minutesString = MultilingualTokens.MINUTES_TOKEN.in(language);

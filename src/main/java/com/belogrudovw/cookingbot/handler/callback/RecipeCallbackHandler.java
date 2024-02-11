@@ -3,6 +3,7 @@ package com.belogrudovw.cookingbot.handler.callback;
 import com.belogrudovw.cookingbot.domain.Chat;
 import com.belogrudovw.cookingbot.domain.Recipe;
 import com.belogrudovw.cookingbot.domain.buttons.RecipeButtons;
+import com.belogrudovw.cookingbot.domain.displayable.Languages;
 import com.belogrudovw.cookingbot.domain.screen.CustomScreen;
 import com.belogrudovw.cookingbot.domain.screen.DefaultScreens;
 import com.belogrudovw.cookingbot.domain.telegram.CallbackQuery;
@@ -10,9 +11,11 @@ import com.belogrudovw.cookingbot.exception.IllegalChatStateException;
 import com.belogrudovw.cookingbot.lexic.SimpleStringToken;
 import com.belogrudovw.cookingbot.service.ChatService;
 import com.belogrudovw.cookingbot.service.CookingScheduleService;
+import com.belogrudovw.cookingbot.service.ImageSupplier;
 import com.belogrudovw.cookingbot.service.InteractionService;
 import com.belogrudovw.cookingbot.service.OrderService;
 import com.belogrudovw.cookingbot.service.RecipeService;
+import com.belogrudovw.cookingbot.service.TranslationSupplier;
 import com.belogrudovw.cookingbot.storage.Storage;
 
 import java.time.Duration;
@@ -34,23 +37,29 @@ public class RecipeCallbackHandler extends AbstractCallbackHandler {
     static final DefaultScreens CURRENT_SCREEN = DefaultScreens.SPIN_PICK_RECIPE;
 
     ChatService chatService;
+    Storage<Long, Chat> chatStorage;
     OrderService orderService;
     RecipeService recipeService;
     Storage<UUID, Recipe> recipeStorage;
     CookingScheduleService cookingScheduleService;
     InteractionService interactionService;
+    TranslationSupplier translationSupplier;
+    ImageSupplier imageSupplier;
 
     // TODO: 29/01/2024 Get rid of overcomplexity
-    public RecipeCallbackHandler(ChatService chatService, Storage<Long, Chat> chatStorage, OrderService orderService,
-                                 RecipeService recipeService, Storage<UUID, Recipe> recipeStorage,
+    public RecipeCallbackHandler(ChatService chatService, Storage<Long, Chat> chatStorage, OrderService orderService, ImageSupplier imageSupplier,
+                                 RecipeService recipeService, Storage<UUID, Recipe> recipeStorage, TranslationSupplier translationSupplier,
                                  CookingScheduleService cookingScheduleService, InteractionService interactionService) {
         super(chatStorage);
         this.chatService = chatService;
+        this.chatStorage = chatStorage;
         this.orderService = orderService;
         this.recipeStorage = recipeStorage;
         this.recipeService = recipeService;
         this.cookingScheduleService = cookingScheduleService;
         this.interactionService = interactionService;
+        this.translationSupplier = translationSupplier;
+        this.imageSupplier = imageSupplier;
     }
 
     @Override
@@ -72,7 +81,7 @@ public class RecipeCallbackHandler extends AbstractCallbackHandler {
             }
             case RECIPE_SPIN -> respondNewRecipe(chat, messageId);
 //            case RECIPE_CALORIC -> respondCaloric(chat, messageId);
-//            case RECIPE_IMAGE -> respondImage(chat, messageId);
+            case RECIPE_IMAGE -> respondImage(chat);
             case RECIPE_BACK -> {
                 chat.setAwaitCustomQuery(false);
                 interactionService.showResponse(chat, messageId, orderService.prevScreen(CURRENT_SCREEN));
@@ -90,21 +99,59 @@ public class RecipeCallbackHandler extends AbstractCallbackHandler {
                 .ifPresent(screen -> interactionService.showResponse(chat, messageId, screen));
     }
 
-    private void respondImage(Chat chat, int messageId) {
-        // TODO: 25/01/2024 Implement
-        // 1. call sd for image
-        // 2. respond image to recipe chat
-        //        FileSystemResource photo = new FileSystemResource("/Users/slb/Downloads/qwer.png");
-        //        client.post()
-        //                .uri("/sendPhoto")
-        //                .contentType(MediaType.MULTIPART_FORM_DATA)
-        //                .body(BodyInserters
-        //                        .fromMultipartData("chat_id", "-1002012962538")
-        //                        .with("photo", photo)
-        //                )
-        //                .exchangeToMono(resp -> resp.bodyToMono(PhotoSaveResponse.class))
-        //                .subscribe(System.out::println);
-        // 3. respond with photo_id to original chat
+    private void respondImage(Chat chat) {
+        Recipe recipe = recipeStorage.findById(chat.getCurrentRecipe()).orElseThrow();
+        CustomScreen screen = CustomScreen.builder()
+                .buttons(Collections.emptyList())
+                .textToken(new SimpleStringToken(""))
+                .build();
+        getImageId(recipe, chat.getImageProgress().getAndIncrement())
+                .map(imageId -> {
+                    chatStorage.save(chat);
+                    return imageId;
+                })
+                .subscribe(imageId -> {
+                    if (chat.getLastUsedMessageId().get() > chat.getLastUsedImageMessageId().get()) {
+                        interactionService.showResponse(chat, screen, imageId);
+                    } else {
+                        interactionService.showResponse(chat, chat.getLastUsedImageMessageId().get(), screen, imageId);
+                    }
+                });
+    }
+
+    private Mono<String> getImageId(Recipe recipe, int imageProgress) {
+        // TODO: 13/02/2024 Add flag for image regeneration ability
+        int size = recipe.getImageIds().size();
+        if (!recipe.getImageIds().isEmpty() && size > 0 && imageProgress < size) {
+            return Mono.just(recipe.getImageIds().get(imageProgress));
+        } else {
+            return translateRecipe(recipe)
+                    .flatMap(imageSupplier::getImageByText)
+                    .flatMap(interactionService::saveImage)
+                    .map(imageId -> {
+                        log.info("New image generated for recipe {} - {}", recipe.getTitle(), imageId);
+                        recipe.getImageIds().add(imageId);
+                        recipeStorage.save(recipe);
+                        return imageId;
+                    });
+        }
+    }
+
+    private Mono<String> translateRecipe(Recipe recipe) {
+        if (recipe.getEngText() != null && !recipe.getEngText().isBlank()) {
+            return Mono.just(recipe.getEngText());
+        }
+        String recipeString = "%s. %s. %s"
+                .formatted(recipe.getTitle(), recipe.getShortDescription(), String.join(", ", recipe.getIngredients()));
+        if (recipe.getLanguage() == Languages.EN) {
+            return Mono.just(recipeString);
+        }
+        return translationSupplier.getTranslation(recipeString)
+                .map(recipeEngString -> {
+                    recipe.setEngText(recipeEngString);
+                    recipeStorage.save(recipe);
+                    return recipeEngString;
+                });
     }
 
     private void respondCaloric(Chat chat, int messageId) {

@@ -1,4 +1,4 @@
-package com.belogrudovw.cookingbot.service.telegram;
+package com.belogrudovw.cookingbot.service.impl;
 
 import com.belogrudovw.cookingbot.domain.Chat;
 import com.belogrudovw.cookingbot.domain.telegram.CallbackQuery;

@@ -1,14 +1,17 @@
-package com.belogrudovw.cookingbot.service.impl;
+package com.belogrudovw.cookingbot.service.external;
 
 import com.belogrudovw.cookingbot.config.OpenAiProperties;
+import com.belogrudovw.cookingbot.config.ResilienceProperties;
 import com.belogrudovw.cookingbot.domain.Recipe;
 import com.belogrudovw.cookingbot.domain.RequestPreferences;
+import com.belogrudovw.cookingbot.domain.openai.OpenApiResponse;
 import com.belogrudovw.cookingbot.exception.RecipeGenerationException;
+import com.belogrudovw.cookingbot.exception.TranslationGenerationException;
 import com.belogrudovw.cookingbot.service.RecipeSupplier;
+import com.belogrudovw.cookingbot.service.TranslationSupplier;
 import com.belogrudovw.cookingbot.storage.Storage;
 
 import java.time.Duration;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -28,28 +31,49 @@ import reactor.util.retry.Retry;
 import reactor.util.retry.RetryBackoffSpec;
 
 import static com.belogrudovw.cookingbot.util.JsonTemplates.OPEN_AI_RECIPE_REQUEST_TEMPLATE;
+import static com.belogrudovw.cookingbot.util.JsonTemplates.OPEN_AI_TRANSLATION_REQUEST_TEMPLATE;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class OpenAiClient implements RecipeSupplier {
-
-    static final int MAX_ATTEMPTS = 5;
-    static final int RESPONSE_TIMEOUT_MIN = 3;
+public class OpenAiClient implements RecipeSupplier, TranslationSupplier {
 
     WebClient openAiWebClient;
-    OpenAiProperties properties;
+    OpenAiProperties openAiProperties;
+    ResilienceProperties resilienceProperties;
     ObjectMapper objectMapper;
     Storage<UUID, Recipe> recipeStorage;
 
     @Override
-    public Mono<Recipe> get(RequestPreferences request, String additionalQuery) throws RuntimeException {
+    public Mono<Recipe> getRecipe(RequestPreferences request, String additionalQuery) throws RuntimeException {
         Set<String> alreadyRequestedRecipes = new ConcurrentSkipListSet<>();
         return enhanceableRequest(request, additionalQuery, alreadyRequestedRecipes)
                 .retryWhen(setupRetry())
-                .doOnError(err -> log.error("Retries weren't complete by {} attempts", MAX_ATTEMPTS, err))
+                .doOnError(err -> log.error("Retries weren't complete by {} attempts", resilienceProperties.retry().count(), err))
                 .onErrorReturn(getStubRecipe(request.getLanguage()));
+    }
+
+    @Override
+    public Mono<String> getTranslation(String request) {
+        OpenAiProperties.Conversation conversation = openAiProperties.conversation();
+        String requestBody = OPEN_AI_TRANSLATION_REQUEST_TEMPLATE.getJson()
+                .replaceAll("\\$\\{model}", conversation.models().cheap())
+                .replaceAll("\\$\\{temperature}", conversation.temperature())
+                .replaceAll("\\$\\{max-tokens}", conversation.maxTokens())
+                .replaceAll("\\$\\{text}", request);
+        return openAiWebClient.post()
+                .bodyValue(requestBody)
+                .exchangeToMono(resp -> resp.bodyToMono(OpenApiResponse.class))
+                .subscribeOn(Schedulers.parallel())
+                .timeout(Duration.ofMinutes(resilienceProperties.timeoutMinutes()))
+                .retryWhen(setupRetry())
+                .doOnError(err -> {
+                    String exceptionMessage = "OpenAi invocation failed";
+                    log.error(exceptionMessage, err);
+                    throw new TranslationGenerationException(exceptionMessage, err);
+                })
+                .map(resp -> resp.choices().get(0).message().content());
     }
 
     private Mono<Recipe> enhanceableRequest(RequestPreferences request, String additionalQuery, Set<String> alreadyRequested) {
@@ -81,7 +105,7 @@ public class OpenAiClient implements RecipeSupplier {
                 .bodyValue(requestBody)
                 .exchangeToMono(resp -> resp.bodyToMono(OpenApiResponse.class))
                 .subscribeOn(Schedulers.parallel())
-                .timeout(Duration.ofMinutes(RESPONSE_TIMEOUT_MIN))
+                .timeout(Duration.ofMinutes(resilienceProperties.timeoutMinutes()))
                 .doOnError(err -> {
                     String exceptionMessage = "OpenAi invocation failed";
                     log.error(exceptionMessage, err);
@@ -91,8 +115,7 @@ public class OpenAiClient implements RecipeSupplier {
     }
 
     private String prepareRequestBody(RequestPreferences request, String additionalQuery, Set<String> alreadyRequested) {
-        // TODO: 04/02/2024 Replace by pojo build
-        OpenAiProperties.Conversation conversation = properties.conversation();
+        OpenAiProperties.Conversation conversation = openAiProperties.conversation();
         String temperature = conversation.temperature();
         String additionalQueryReplacement = additionalQuery.isBlank()
                 ? ""
@@ -131,20 +154,11 @@ public class OpenAiClient implements RecipeSupplier {
         }
     }
 
-    private static RetryBackoffSpec setupRetry() {
-        return Retry.backoff(MAX_ATTEMPTS, Duration.ofSeconds(1))
-                .jitter(0.75)
+    private RetryBackoffSpec setupRetry() {
+        return Retry.backoff(resilienceProperties.retry().count(), Duration.ofSeconds(resilienceProperties.retry().delaySeconds()))
+                .jitter(resilienceProperties.retry().jitter())
                 .filter(RecipeGenerationException.class::isInstance)
                 .doAfterRetry(retrySignal -> log.info("Retried {}", retrySignal.totalRetries() + 1))
                 .onRetryExhaustedThrow((retryBackoffSpec, retrySignal) -> new RecipeGenerationException("Retry limit exceeded"));
-    }
-
-    record OpenApiResponse(List<Choice> choices) {
-
-        record Choice(int index, Message message) {
-        }
-
-        record Message(String content) {
-        }
     }
 }

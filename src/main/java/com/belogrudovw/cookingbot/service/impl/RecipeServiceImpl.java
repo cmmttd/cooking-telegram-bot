@@ -57,9 +57,9 @@ public class RecipeServiceImpl implements RecipeService {
                 .orElseGet(() -> {
                     // TODO: 10/02/2024 Consider well-looking logging
                     if (chat.isAwaitCustomQuery()) {
-                        log.warn("Existing recipe hasn't found for chat {} - {}", chat.getId(), chat.getAdditionalQuery());
+                        log.warn("Existing recipe wasn't found for chat {} - {}", chat.getId(), chat.getAdditionalQuery());
                     } else {
-                        log.warn("Existing recipe hasn't found for chat {}", chat.getId());
+                        log.warn("Existing recipe wasn't found for chat {}", chat.getId());
                     }
                     return requestNew(chat);
                 })
@@ -70,7 +70,7 @@ public class RecipeServiceImpl implements RecipeService {
     public Mono<Recipe> requestNew(Chat chat) {
         String additionalQuery = chat.isAwaitCustomQuery() && chat.getAdditionalQuery() != null ? chat.getAdditionalQuery() : "";
         log.info("New recipe generation requested for chat {} - {}", chat.getId(), additionalQuery);
-        return recipeSupplier.get(chat.getRequestPreferences(), additionalQuery)
+        return recipeSupplier.getRecipe(chat.getRequestPreferences(), additionalQuery)
                 .doOnSuccess(recipe -> log.info("New recipe '{}' has been generated for chat {}", recipe.getTitle(), chat.getId()));
     }
 }
