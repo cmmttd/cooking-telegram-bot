@@ -32,7 +32,7 @@ public record UserAction(
                 .map(chat -> Stream.of(chat.firstName(), chat.lastName(), chat.username())
                         .filter(Optional::isPresent)
                         .map(Optional::get)
-                        .filter(x -> !x.isBlank())
+                        .filter(namesPart -> !namesPart.isBlank())
                         .collect(Collectors.joining(" ")))
                 .orElse("User name unknown");
     }

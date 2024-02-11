@@ -13,7 +13,7 @@ public enum MultilingualTokens implements StringToken {
             "Choisissez la langue"),
     CHOOSE_MEASUREMENTS_TOKEN("Measurements unit format", "Выберите систему единиц измерений", "Maßeinheiten auswählen", "选择测量单位",
             "Виберіть одиниці вимірів", "Sélectionnez les unités de mesure"),
-    CHOOSE_LIGHTNESS_TOKEN("Lightness of the desired dish (calories)", "Выберите относительную тяжесть (каллораж)",
+    CHOOSE_LIGHTNESS_TOKEN("Lightness of the desired dish (calories)", "Выберите относительную тяжесть (калораж)",
             "Wählen Sie den Schweregrad des gewünschten Gerichts", "选择所需菜肴的严重程度", "Виберіть тягар бажаної страви",
             "Sélectionnez la sévérité du plat souhaité"),
     CHOOSE_DIFFICULTIES_TOKEN("How long do you plan to cook?", "Как много времени у вас есть на готовку?",

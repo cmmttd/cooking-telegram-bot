@@ -8,5 +8,5 @@ public interface ChatService {
 
     void setNewRecipe(Chat chat, Recipe recipe);
 
-    Chat createNewChat(UserAction action);
+    Chat createNewChat(long chatId, UserAction action);
 }

@@ -18,6 +18,12 @@ recovery:
   is-needed: ${RECOVERY_IS_NEEDED:false}
   default-recipes-path: ${RECOVERY_RECIPES_PATH}
   chats-path: ${RECOVERY_CHATS_PATH}
+resilience:
+  retry:
+    count: 3
+    delay-seconds: 2
+    jitter: 0.75
+  timeout-minutes: 2
 open-ai:
   url:
     base: https://api.openai.com
@@ -26,7 +32,7 @@ open-ai:
   token: ${OPENAI_TOKEN}
   conversation:
     models:
-      cheap: gpt-3.5-turbo-1106
+      cheap: gpt-3.5-turbo-0125
       wise: gpt-4-1106-preview
     temperature: 1.25
     max-tokens: 4000
@@ -38,7 +44,8 @@ telegram:
     name: ${COOKING_BOT_NAME}
     path: /webhook/
 stable-diffusion:
-  api-url: https://api.stability.ai/v1/generation/stable-diffusion-v1-6/
+  api-url: https://api.stability.ai/v1/generation/stable-diffusion-v1-6
+  path: /text-to-image
   token: ${STABILITY_TOKEN}
 
 ---

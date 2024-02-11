@@ -30,7 +30,7 @@ import reactor.core.publisher.Mono;
 public class PatternMessageHandlerCustomQuery implements PatternMessageHandler {
 
     static final DefaultScreens RESPONSE_SCREEN = DefaultScreens.SPIN_PICK_RECIPE;
-    static final String CUSTOM_QUERY_PATTERN = "[[\\p{L}\\p{N}\\s!,.-]]{1,200}";
+    static final String CUSTOM_QUERY_PATTERN = "[\\p{L}\\p{N}\\s!,;:'\"*.-]{1,250}";
 
     DefaultHandler defaultHandler;
     ChatService chatService;
@@ -65,7 +65,7 @@ public class PatternMessageHandlerCustomQuery implements PatternMessageHandler {
     }
 
     private void respondAsync(Chat chat) {
-        Mono.fromRunnable(() -> interactionService.showSpinner(chat))
+        Mono.fromRunnable(() -> interactionService.showSpinner(chat, chat.getLastUsedMessageId().get()))
                 .then(recipeService.getRandom(chat)
                         .delaySubscription(Duration.ofMillis(500)))
                 .map(recipe -> buildNextScreenForRecipe(chat, recipe))
