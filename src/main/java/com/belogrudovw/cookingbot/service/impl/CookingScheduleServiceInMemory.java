@@ -52,7 +52,6 @@ public class CookingScheduleServiceInMemory implements CookingScheduleService {
         cancelSchedule(chat);
         UUID recipeId = chat.getCurrentRecipe();
         long chatId = chat.getId();
-        timestampsByChatId.put(chatId, new HashSet<>());
         int cookingProgress = chat.getCookingProgress();
         recipeStorage.findById(recipeId)
                 .map(Recipe::getSteps)
@@ -60,12 +59,13 @@ public class CookingScheduleServiceInMemory implements CookingScheduleService {
                 .ifPresent(steps -> {
                     long prevStepOffset = cookingProgress > 0 ? steps.get(cookingProgress - 1).offset() : 0;
                     long baseOffset = TimeUnit.MINUTES.toMillis(prevStepOffset);
-//            long baseOffset = TimeUnit.MINUTES.toMillis(prevStepOffset) / 100;
+//                    long baseOffset = TimeUnit.MINUTES.toMillis(prevStepOffset) / 100;
                     long nowMillis = System.currentTimeMillis() - baseOffset;
+                    timestampsByChatId.putIfAbsent(chatId, new HashSet<>());
                     for (int i = cookingProgress; i < steps.size(); i++) {
                         Recipe.Step step = steps.get(i);
                         long nextStepOffsetMillis = TimeUnit.MINUTES.toMillis(step.offset());
-//                long nextStepOffsetMillis = TimeUnit.MINUTES.toMillis(step.offset()) / 100;
+//                        long nextStepOffsetMillis = TimeUnit.MINUTES.toMillis(step.offset()) / 100;
                         long taskStartTime = nowMillis + nextStepOffsetMillis;
                         tasksTimeline.putIfAbsent(taskStartTime, new HashMap<>());
                         tasksTimeline.get(taskStartTime).put(chatId, new RecipeStepTask(recipeId, i));
@@ -153,21 +153,3 @@ public class CookingScheduleServiceInMemory implements CookingScheduleService {
     private record RecipeStepTask(UUID recipeId, int stepCount) {
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -14,6 +14,7 @@ import com.belogrudovw.cookingbot.service.RecipeService;
 import com.belogrudovw.cookingbot.storage.Storage;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -59,6 +60,7 @@ public class PatternMessageHandlerCustomQuery implements PatternMessageHandler {
                         log.warn("User {} tried custom query typing, but on wrong state", action.getUserName());
                         defaultHandler.handle(chat);
                     }
+                    chat.setLastActiveTime(LocalDateTime.now());
                     return chat;
                 })
                 .ifPresent(chatStorage::save);

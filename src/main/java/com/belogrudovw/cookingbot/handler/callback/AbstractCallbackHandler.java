@@ -6,6 +6,8 @@ import com.belogrudovw.cookingbot.domain.telegram.UserAction;
 import com.belogrudovw.cookingbot.exception.IllegalChatStateException;
 import com.belogrudovw.cookingbot.storage.Storage;
 
+import java.time.LocalDateTime;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -27,6 +29,7 @@ public abstract class AbstractCallbackHandler implements CallbackHandler {
                     String userIdentification = chat.getId() + " - " + chat.getUsername();
                     log.info("Route {} to {} for user: {}", callbackQuery.data(), this.getClass().getSimpleName(), userIdentification);
                     handleCallback(chat, callbackQuery);
+                    chat.setLastActiveTime(LocalDateTime.now());
                     chatStorage.save(chat);
                 });
     }

@@ -127,7 +127,7 @@ public class RecipeCallbackHandler extends AbstractCallbackHandler {
         } else {
             return translateRecipe(recipe)
                     .flatMap(imageSupplier::getImageByText)
-                    .flatMap(interactionService::saveImage)
+                    .flatMap(file -> interactionService.saveImage(file, recipe.getTitle()))
                     .map(imageId -> {
                         log.info("New image generated for recipe {} - {}", recipe.getTitle(), imageId);
                         recipe.getImageIds().add(imageId);

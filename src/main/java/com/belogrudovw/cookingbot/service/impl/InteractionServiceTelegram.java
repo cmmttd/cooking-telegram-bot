@@ -30,8 +30,7 @@ public class InteractionServiceTelegram implements InteractionService {
     @Override
     public void showSpinner(Chat chat, int messageId) {
         responseService.editMessage(chat.getId(), messageId, buildAwaitSpinner(chat), buildEmptyKeyboard())
-                .map(response -> updateLastUsedMessage(chat, response))
-                .subscribe(chatStorage::save);
+                .subscribe(response -> updateLastUsedMessage(chat, response));
     }
 
     @Override
@@ -40,8 +39,7 @@ public class InteractionServiceTelegram implements InteractionService {
         Keyboard keyboard = buildDefaultKeyboard(screen.getButtons(), language);
         String text = screen.getTextToken().in(language);
         responseService.sendMessage(chat.getId(), text, keyboard)
-                .map(response -> updateLastUsedMessage(chat, response))
-                .subscribe(chatStorage::save);
+                .subscribe(response -> updateLastUsedMessage(chat, response));
     }
 
     @Override
@@ -50,8 +48,7 @@ public class InteractionServiceTelegram implements InteractionService {
         Keyboard keyboard = buildDefaultKeyboard(screen.getButtons(), language);
         String text = screen.getTextToken().in(language);
         responseService.editMessage(chat.getId(), messageId, text, keyboard)
-                .map(response -> updateLastUsedMessage(chat, response))
-                .subscribe(chatStorage::save);
+                .subscribe(response -> updateLastUsedMessage(chat, response));
     }
 
     @Override
@@ -60,8 +57,7 @@ public class InteractionServiceTelegram implements InteractionService {
         Keyboard keyboard = buildDefaultKeyboard(screen.getButtons(), language);
         String text = screen.getTextToken().in(language);
         responseService.sendImage(chat.getId(), text, keyboard, imageId)
-                .map(response -> updateLastUsedImageMessage(chat, response))
-                .subscribe(chatStorage::save);
+                .subscribe(response -> updateLastUsedImageMessage(chat, response));
     }
 
     @Override
@@ -70,23 +66,30 @@ public class InteractionServiceTelegram implements InteractionService {
         Keyboard keyboard = buildDefaultKeyboard(screen.getButtons(), language);
         String text = screen.getTextToken().in(language);
         responseService.editImage(chat.getId(), messageId, text, keyboard, imageId)
-                .map(response -> updateLastUsedImageMessage(chat, response))
-                .subscribe(chatStorage::save);
+                .subscribe(response -> updateLastUsedImageMessage(chat, response));
     }
 
     @Override
-    public Mono<String> saveImage(byte[] file) {
-        return responseService.saveImage(file)
+    public Mono<String> saveImage(byte[] file, String description) {
+        return responseService.saveImage(file, description)
                 .map(photoSaveResponse -> photoSaveResponse.result().photo().get(0).fileId());
     }
 
-    private Chat updateLastUsedMessage(Chat chat, TelegramResponse response) {
-        chat.getLastUsedMessageId().set(response.result().messageId());
-        return chat;
+    private void updateLastUsedMessage(Chat chat, TelegramResponse response) {
+        chatStorage.findById(chat.getId())
+                .map(ch -> {
+                    ch.getLastUsedMessageId().set(response.result().messageId());
+                    return ch;
+                })
+                .ifPresent(chatStorage::save);
     }
 
-    private Chat updateLastUsedImageMessage(Chat chat, TelegramResponse response) {
-        chat.getLastUsedImageMessageId().set(response.result().messageId());
-        return chat;
+    private void updateLastUsedImageMessage(Chat chat, TelegramResponse response) {
+        chatStorage.findById(chat.getId())
+                .map(ch -> {
+                    ch.getLastUsedImageMessageId().set(response.result().messageId());
+                    return ch;
+                })
+                .ifPresent(chatStorage::save);
     }
 }
