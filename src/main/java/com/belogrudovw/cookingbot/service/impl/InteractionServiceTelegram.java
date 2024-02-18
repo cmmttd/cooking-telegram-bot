@@ -75,8 +75,8 @@ public class InteractionServiceTelegram implements InteractionService {
     }
 
     @Override
-    public Mono<String> saveImage(byte[] file) {
-        return responseService.saveImage(file)
+    public Mono<String> saveImage(byte[] file, String description) {
+        return responseService.saveImage(file, description)
                 .map(photoSaveResponse -> photoSaveResponse.result().photo().get(0).fileId());
     }
 
