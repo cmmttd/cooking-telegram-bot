@@ -10,7 +10,7 @@ public interface ResponseService {
 
     Mono<TelegramResponse> editMessage(long chatId, long messageId, String text, Keyboard keyboard);
 
-    Mono<TelegramResponse> saveImage(byte[] file);
+    Mono<TelegramResponse> saveImage(byte[] file, String description);
 
     Mono<TelegramResponse> sendImage(long chatId, String text, Keyboard keyboard, String path);
 

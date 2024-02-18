@@ -49,7 +49,7 @@ public class TelegramRestClient implements ResponseService {
     }
 
     @Override
-    public Mono<TelegramResponse> saveImage(byte[] file) {
+    public Mono<TelegramResponse> saveImage(byte[] file, String description) {
         ByteArrayResource byteArrayResource = new ByteArrayResource(file) {
             @Override
             public String getFilename() {
@@ -58,6 +58,7 @@ public class TelegramRestClient implements ResponseService {
         };
         var bodyInserters = BodyInserters
                 .fromMultipartData("chat_id", "-1002012962538")
+                .with("caption", escapeCharacters(description))
                 .with("photo", byteArrayResource);
         return telegramWebClient.post()
                 .uri("/sendPhoto")

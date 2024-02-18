@@ -16,5 +16,5 @@ public interface InteractionService {
 
     void showResponse(Chat chat, long messageId, Screen nextScreen, String imageId);
 
-    Mono<String> saveImage(byte[] file);
+    Mono<String> saveImage(byte[] file, String description);
 }
