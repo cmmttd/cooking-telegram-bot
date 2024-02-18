@@ -9,6 +9,8 @@ import com.belogrudovw.cookingbot.service.ChatService;
 import com.belogrudovw.cookingbot.service.OrderService;
 import com.belogrudovw.cookingbot.storage.Storage;
 
+import java.time.LocalDateTime;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -42,12 +44,13 @@ public class ChatServiceImpl implements ChatService {
         action.message()
                 .map(Message::messageId)
                 .ifPresent(id -> newChat.getLastUsedMessageId().set(id));
+        newChat.setLastActiveTime(LocalDateTime.now());
         chatStorage.save(newChat);
         log.info("New user created with id: {}", chatId);
         return newChat;
     }
 
-    private static void setIfUserBot(long chatId, UserAction action, Chat newChat) {
+    private void setIfUserBot(long chatId, UserAction action, Chat newChat) {
         if (chatId < 0) {
             newChat.setUsername(action.toString());
         }

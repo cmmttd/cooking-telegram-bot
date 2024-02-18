@@ -2,6 +2,7 @@ package com.belogrudovw.cookingbot.domain;
 
 import com.belogrudovw.cookingbot.domain.screen.DefaultScreens;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Queue;
 import java.util.UUID;
@@ -34,6 +35,7 @@ public class Chat {
     String additionalQuery;
     AtomicInteger lastUsedMessageId;
     AtomicInteger lastUsedImageMessageId;
+    LocalDateTime lastActiveTime;
 
     public Chat(long id, String username) {
         this.id = id;

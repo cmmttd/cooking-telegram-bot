@@ -77,7 +77,6 @@ public class CookingCallbackHandler extends AbstractCallbackHandler {
                 .then(Mono.fromRunnable(() -> congratulateIfCompleted(chat, recipe))
                         .delaySubscription(Duration.ofMillis(1000)))
                 .subscribe();
-
     }
 
     private void respondNextStep(Chat chat, Recipe recipe) {
