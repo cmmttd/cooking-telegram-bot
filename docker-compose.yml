@@ -19,6 +19,7 @@ services:
       - RECOVERY_IS_NEEDED=${COOKING_BOT_RECOVERY_IS_NEEDED}
       - RECOVERY_CHATS_PATH=/usr/app/data/chats/
       - RECOVERY_RECIPES_PATH=/usr/app/data/default_recipes/
+      - STABILITY_TOKEN=${STABILITY_TOKEN}
       - LOGS_PATH=/usr/app/data/logs/
     volumes:
       - /home/home/dev/data/cooking-bot/:/usr/app/data/
