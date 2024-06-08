@@ -33,7 +33,7 @@ open-ai:
   conversation:
     models:
       cheap: gpt-3.5-turbo-0125
-      wise: gpt-4-1106-preview
+      wise: gpt-4o-2024-05-13
     temperature: 1.25
     max-tokens: 4000
 telegram:
