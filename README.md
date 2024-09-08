@@ -16,7 +16,7 @@ Just open the bot, click "Start сooking" and just follow to notifications.
 
 ## Useful links
 
-[Telegram Bot](tbd)\
+[Telegram Bot](https://t.me/Ear1yAccessBot)\
 [Concept board](https://miro.com/app/board/uXjVNHdZ5Oc=/?share_link_id=42246636944)
 
 ## How to run
